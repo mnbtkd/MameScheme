@@ -1,0 +1,61 @@
+
+all: mame
+
+CC=@CC@
+INSTDIR=.
+INCLUDE=.
+
+#    CFLAGS=-g -Wall -arch i386
+CFLAGS=@CFLAGS@
+
+# for profiling
+#CFLAGS=-g -pg
+
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+
+# BGCLIB=-L/usr/local/lib -lgc
+
+GTAGS=gtags
+
+OUT=mame
+.c.o:
+	$(CC) -I$(INCLUDE) $(CFLAGS) -c $<
+
+mame: main.o st.o list.o vm.o write.o string.o vector.o symbol.o port.o read.o util.o numeric.o subr.o GTAGS
+	$(CC) $(CFLAGS) $(LIBS) -o $(OUT) main.o st.o list.o vm.o write.o string.o vector.o symbol.o port.o read.o util.o numeric.o subr.o
+
+main.o:    main.c mame.h
+vm.o:      vm.c mame.h compile.c subr.c
+st.o:      st.c st.h
+list.o:    list.c mame.h
+write.o:   write.c mame.h
+string.o:  string.c mame.h
+vector.o:  vector.c mame.h
+symbol.o:  symbol.c st.h st.c mame.h
+port.o:    port.c mame.h
+read.o:    read.c mame.h
+util.o:    util.c mame.h
+numeric.o: numeric.c mame.h
+subr.o:    subr.c subr.h mame.h
+
+GTAGS: list.c main.c mame.h st.c st.h vm.c write.c string.c vector.c symbol.c port.c read.c util.c numeric.c subr.c subr.h
+	$(GTAGS)
+
+clean:
+	-rm *.o $(OUT) $(OUT_TEST) GTAGS GPATH GRTAGS GSYMS
+	-rm compile.c
+
+test: mame
+	./$(OUT) -f test-all.scm
+
+bench: $(OUT)
+	. bench.sh
+
+compile.c: gen.scm util.scm expand.scm compile.scm vm.scm eval.scm lib_syn.scm
+	gosh -e '(load "./gen.scm")'
+
+check-syntax:
+	$(CC) $(CFLAGS) -Wextra -pedantic -fsyntax-only $(CHK_SOURCES)
+
+.PHONY: clean test

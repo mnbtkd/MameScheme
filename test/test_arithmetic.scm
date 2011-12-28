@@ -1,0 +1,93 @@
+(run-test "test_arithmetic.scm:arithmetic "
+          (begin
+            [assert (* 1) 1]
+            [assert (* 2 3) 6]
+            [assert (* 2 3 4) 24]
+            [assert (* 3 3/2) 9/2]
+
+            [assert (/ 1) 1]
+            [assert (/ 6 3) 2]
+            [assert (/ 24 3 2) 4]
+            [assert (/ 7 3) 7/3]
+            [assert (/ 67693145552775982373866185
+                2918354693076954957695495769285) 237519808957108710083741/10239841028340192834019283401]
+            [assert (/ 4 2.0) 2]
+            [assert (/ 4 1/2) 2]
+            [assert (/ 9/7) 7/9]
+            [assert (/ 9/7 1/2) 18/7]
+
+            [assert (quotient 7 3) 2]
+            [assert (quotient -6 3) -2]
+
+            [assert (+ 1) 1]
+            [assert (+ 1 2) 3]
+            [assert (+ 1 2 3) 6]
+            [assert (+ 1/2 2/3)  7/6]
+            [assert (+ 1 1/2) 3/2]
+            [assert (+ 0.5 0.25) 0.75]
+
+            [assert (- 1) -1]
+            [assert (- 9 4) 5]
+            [assert (- 6 2 1 ) 3]
+            [assert (- 1.1) -1.1]
+            [assert (- 1 0.5) 0.5]
+            [assert (- 4294967296) -4294967296]
+            [assert (- 4294967295) -4294967295]
+            [assert (- 2147483648) -2147483648]
+            [assert (- 2147483647) -2147483647]
+            [assert (- 1073741824) -1073741824]
+            [assert (- 1073741823) -1073741823]
+            [assert (- 536870912)  -536870912]
+            [assert (- 536870911)  -536870911]
+            [assert (- -1) 1]
+            [assert (- 0)  0]
+            [assert (- 4312441/5451 123412/732) 206999000/332511]
+
+            [assert (zero? 0) #t]
+            [assert (zero? 2) #f]
+            [assert (zero? -1) #f]
+
+            [assert (gcd 4 6) 2]
+            [assert (gcd 84 60) 12]
+            [assert (gcd 4 5) 1]
+            [assert (gcd 3) 3]
+            [assert (gcd 4 8 6) 2]
+            [assert (gcd) 0]
+
+            [assert (lcm 4 6) 12]
+            [assert (lcm 84 60) 420]
+            [assert (lcm 45 42) 630]
+            [assert (lcm 1 5) 5]
+            [assert (lcm 3) 3]
+            [assert (lcm 2 4 6) 12]
+            [assert (lcm) 1]
+            [assert (lcm 3366 14586 37026 38148) 16365492]
+
+            [assert (even? 2) #t]
+            [assert (odd?  3) #t]
+            [assert (even? 3) #f]
+            [assert (odd?  4) #f]
+            [assert (even? -2) #t]
+            [assert (odd?  -3) #t]
+            [assert (even? -3) #f]
+            [assert (odd?  -4) #f]
+            [assert (even? 0) #t]
+            [assert (odd?  0) #f]
+
+            [assert (modulo  13  4) 1]
+            [assert (modulo -13  4) 3]
+            [assert (modulo  13 -4) -3]
+            [assert (modulo -13 -4) -1]
+
+            [assert (remainder  13  4) 1]
+            [assert (remainder -13  4) -1]
+            [assert (remainder  13 -4) 1]
+            [assert (remainder -13 -4) -1]
+            [assert (remainder 3 4) 3]
+            [assert (remainder 3 3) 0]
+            [assert (remainder 278498339886093762438332717358287437676301 9705932023587917550) 6176064781119719001]
+            [assert (remainder -13 -4.0) -1.0]
+
+
+            ))
+
