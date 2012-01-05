@@ -100,7 +100,7 @@ enum INSTRUCTIONS {
     I_GSET,         /* 20 */   /* 119 */
     I_RETURN,       /* 21 */   /* 120 */
     I_JUMP,         /* 22 */   /* 121 */
-    I_UNKNOWN,      /* 23 */   /* 122 */
+    I_UNKNOWN       /* 23 */   /* 122 */
 };
 
 static SchObj SYM_NONE;
@@ -184,7 +184,7 @@ enum {
     ATT_CLOSURE,
     ATT_INTEGER,
     ATT_OBJECT,
-    ATT_ADDRESS,
+    ATT_ADDRESS
 };
 
 
@@ -922,14 +922,17 @@ void show_prof_sorted( char* title )
 
 
 /* --- vm ---------------------------------------------------------------------------- */
-SchObj vm ( int demand_insn_tbl, SchObj* x, DisplayClosure* c, int size, int sp, int fp )
+SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int sp, int fp )
 {
-    int    pc = 0;            /* program counter            EIP? */
-    int    s  = sp;           /* stack top                  ESP? */
-    SchObj a  = SCH_UNDEFINE; /* accumulator                EAP? */
-    int    f  = fp;           /* frame ( for dynamic link ) ESB? */
-    int    instr;
-    SchObj* last_addr = 0;
+    int              pc = 0;            /* program counter            EIP? */
+    volatile int     s  = sp;           /* stack top                  ESP? */
+    volatile SchObj  a  = SCH_UNDEFINE; /* accumulator                EAP? */
+    volatile int     f  = fp;           /* frame ( for dynamic link ) ESB? */
+    int              instr;
+    SchObj *         last_addr = 0;
+
+    volatile SchObj *         volatile x = x0;
+    volatile DisplayClosure * volatile c = c0;
 
 #ifdef _VM_DEBUG
     int    s_att = sp;
