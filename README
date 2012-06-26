@@ -1,1 +1,11 @@
 A small and simple R5RS Scheme implementation
+
+
+== How To Compile
+
+1.   Run './configure'
+
+2.   Run 'make'
+
+3.   Optionally, run 'make test' to check if the compiled binary,'mame' works well.
+     But for now, it doesn't pass some tests...
