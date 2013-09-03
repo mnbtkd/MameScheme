@@ -18,7 +18,7 @@
        (if (equal? r0 rslt)
            (begin (display ".")
                   (set! *passed* (cons (quote expr) *passed*)))
-           (begin (display "X")
+           (begin (display "F")
                   (set! *failed* (cons (quote expr) *failed*))))
        ))))
 
