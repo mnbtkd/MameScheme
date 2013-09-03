@@ -72,7 +72,8 @@
        [(equal? exp "#<subr list?>")                    "subr_is_list"]
        [(equal? exp "#<subr make-string>")              "subr_make_string_k"]
        [(equal? exp "#<subr make-vector>")              "subr_make_vector"]
-       [(equal? exp "#<subr map>")                      "subr_map"]
+       [(or (equal? exp "#<closure map>")
+            (equal? exp "#<subr map>"))                 "subr_map"]
        [(equal? exp "#<subr memq>")                     "subr_memq"]
        [(equal? exp "#<subr memv>")                     "subr_memv"]
        [(equal? exp "#<subr not>")                      "subr_not"]
