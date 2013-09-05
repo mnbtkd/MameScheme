@@ -371,6 +371,11 @@ SchObj subr_add(int s, int n)
     LOOP_STACK(s,n,x){
         if ( FIXNUMP(x) ) {
             iret += FIX2INT(x);
+            if ( ! FIXABLE(iret) ) {
+                bret = add_int( bret, int2bignum(iret) );
+                b_count++;
+                iret = 0;
+            }
         } else if ( FLOATP(x) ) {
             dret += SCH_FLOAT_OBJ(x)->d;
             d_count++;
@@ -546,61 +551,38 @@ SchObj subr_mul(int s, int n)
 SchObj subr_sub(int s, int n)
 {
     SchObj x;
+    SchObj sum;
+    int    s0 = s;
+    int    n0 = n;
 
-    int    sum_i   = 0;
-    double sum_d   = 0.0;
-    SchObj sum_b   = INT2FIX(0);
+    x = POP_STACK(s0); n0--;
 
-    int    lmost_i = 0;
-    double lmost_d = 0.0;
-    SchObj lmost_b = INT2FIX(0);
-
-    int    d_count = 0;
-    int    b_count = 0;
-
-    x = POP_STACK(s); n--;
-
-    if ( n < 1 ) {
+    if ( n0 < 1 ) {
         return invert_sign(x);
     }
 
-    if ( FIXNUMP(x) ) {
-        lmost_i = FIX2INT(x);
-    } else if ( FLOATP(x) ) {
-        lmost_d = SCH_FLOAT_OBJ(x)->d;
-        d_count++;
-    } else if ( BIGNUMP(x) ) {
-        lmost_b = x;
-        b_count++;
-    } else if ( RATIONALP(x) ) {
+    sum = subr_add(s0,n0);
+
+    if ( FIXNUMP(x) && FIXNUMP(sum) ) {
+        return INT2FIX( FIX2INT(x) - FIX2INT(sum) );
     }
 
-    LOOP_STACK(s,n,x){
-        if ( FIXNUMP(x) ) {
-            sum_i += FIX2INT(x);
-        } else if ( FLOATP(x)) {
-            sum_d += SCH_FLOAT_OBJ(x)->d;
-            d_count++;
-        } else if ( BIGNUMP(x) ) {
-            sum_b = add_int(sum_b,x);
-            b_count++;
-        }
+    if ( ( FIXNUMP(x) && BIGNUMP(sum) ) ||
+         ( BIGNUMP(x) && FIXNUMP(sum) ) ||
+         ( BIGNUMP(x) && BIGNUMP(sum) ) ) {
+
+        return sub_int( x, sum );
     }
 
-
-    if ( d_count < 1 ) {
-
-        if ( b_count < 1 ) {
-            return INT2FIX(lmost_i-sum_i);
-        }
-
-        return sub_int( add_int(INT2FIX(lmost_i),lmost_b),
-                        add_int(INT2FIX(sum_i),  sum_b  ) );
-
-    } else {
-        return SCH_FLOAT((lmost_i + lmost_d) - (sum_i + sum_d));
+    if ( FIXNUMP(x) && FLOATP(sum) ) {
+        return SCH_FLOAT( FIX2INT(x) - SCH_FLOAT_OBJ(sum)->d );
     }
 
+    if ( FLOATP(x) && FIXNUMP(sum) ) {
+        return SCH_FLOAT( SCH_FLOAT_OBJ(x)->d - FIX2INT(sum) );
+    }
+
+    return SCH_NIL;
 }
 
 SchObj subr_div(int s, int n)

@@ -16,6 +16,7 @@
             [assert (equal? '(a (b) c) '(a (b) c))                 #t]
             [assert (equal? "abc" "abc")                           #t]
             [assert (equal? 2 2)                                   #t]
+            [assert (equal? 0.5 0.5)                               #t]
             [assert (equal? (make-vector 5 'a) (make-vector 5 'a)) #t]
             [assert (equal? #(a (1 2 3) b c) #(a (1 2 3) b c))     #t]
             [assert (equal? #(a (1 2 3) b c) #(a (1 2 4) b c))     #f]
@@ -117,15 +118,16 @@
 
 (run-test "test_equivalence.scm:number_equivalence "
           (begin
-            [assert (= 3 3)  #t]
-            [assert (= 0 0)  #t]
-            [assert (= 4 5)  #f]
-            [assert (= 5 4)  #f]
-            [assert (= 2 2 2)  #t]
-            [assert (= 2 3 4)  #f]
-            [assert (= -1 -1)  #t]
-            [assert (= -1 0)  #f]
-            [assert (= 1/2 0.5)  #t]
+            [assert (= 3 3)     #t]
+            [assert (= 0 0)     #t]
+            [assert (= 4 5)     #f]
+            [assert (= 5 4)     #f]
+            [assert (= 2 2 2)   #t]
+            [assert (= 2 3 4)   #f]
+            [assert (= -1 -1)   #t]
+            [assert (= -1 0)    #f]
+            [assert (= 1/2 0.5) #t]
+            [assert (= 1 1.0)   #t]
 
             [assert (= 1/3 0.3333333333333333333333333333333333333)  #t]
             [assert (= 8147239171756556437613610622889275333631069052587756 8147239171756556437613610622889275333631069052587756)  #t]

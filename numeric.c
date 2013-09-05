@@ -718,19 +718,19 @@ int is_negative(SchObj n) {
 }
 
 SchObj invert_sign(SchObj n) {
+    SchObj n0 = SCH_NIL;
     if ( FIXNUMP(n) ) {
         return INT2FIX(FIX2INT(n)*-1);
     } else if ( BIGNUMP(n) ) {
-        SCH_BIGNUM_OBJ(n)->sign *= -1;
-        return n;
+        n0 = bignum_copy(n);
+        SCH_BIGNUM_OBJ(n0)->sign *= -1;
     } else if ( FLOATP(n) ) {
-        SCH_FLOAT_OBJ(n)->d *= -1;
-        return n;
+        n0 = SCH_FLOAT( SCH_FLOAT_OBJ(n)->d * -1 );
     } else if ( RATIONALP(n) ) {
-        SCH_RATIONAL_OBJ(n)->numerator = invert_sign(SCH_RATIONAL_OBJ(n)->numerator);
-        return n;
+        n0 = SCH_RATIONAL( invert_sign(SCH_RATIONAL_OBJ(n)->numerator),
+                           SCH_RATIONAL_OBJ(n)->denominator );
     }
-    return SCH_NIL;
+    return n0;
 }
 
 SchObj rational(SchObj n, SchObj d)
