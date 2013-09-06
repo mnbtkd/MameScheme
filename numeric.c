@@ -489,6 +489,27 @@ SchObj mul_int( SchObj x, SchObj y )
     return normalize_int(mul_bignum(x_b,y_b));
 }
 
+SchObj mul_rational( SchObj x, SchObj y )
+{
+    SchObj n;
+    SchObj d;
+
+    if ( FIXNUMP(x) && FIXNUMP(y) ) { return mul_int(x,y); }
+
+    if ( FIXNUMP(x) ) {
+        n = mul_int( x, SCH_RATIONAL_OBJ(y)->numerator );
+        d = SCH_RATIONAL_OBJ(y)->denominator;
+    } else if ( FIXNUMP(y) ) {
+        n = mul_int( SCH_RATIONAL_OBJ(x)->numerator, y );
+        d = SCH_RATIONAL_OBJ(x)->denominator;
+    } else {
+        n = mul_int( SCH_RATIONAL_OBJ(x)->numerator,   SCH_RATIONAL_OBJ(y)->numerator   );
+        d = mul_int( SCH_RATIONAL_OBJ(x)->denominator, SCH_RATIONAL_OBJ(y)->denominator );
+    }
+
+    return SCH_RATIONAL( n, d );
+}
+
 SchObj quotient_int_impl( SchObj x, SchObj y, SchObj* rp )
 {
 #define BG_REWIND(__obj__,__dg__,__idx__)                               \

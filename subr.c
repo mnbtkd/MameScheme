@@ -489,9 +489,11 @@ SchObj subr_mul(int s, int n)
     int    i0      = 1;
     double dret    = 1.0;
     SchObj bret    = INT2FIX(1);
+    SchObj rret    = INT2FIX(1);
 
     int    d_count = 0;
     int    b_count = 0;
+    int    r_count = 0;
 
     LOOP_STACK(s,n,x){
         if (FIXNUMP(x)) {
@@ -522,11 +524,19 @@ SchObj subr_mul(int s, int n)
         } else if ( BIGNUMP(x) ) {
             bret = mul_int(bret,x);
             b_count++;
+        } else if ( RATIONALP(x) ) {
+            rret = mul_rational(rret,x);
+            r_count++;
         }
     }
 
-    if ( b_count == 0 && d_count == 0 ) {
+    if ( (b_count|d_count|r_count) == 0 ) {
         return INT2FIX(iret);
+    }
+
+    if ( (b_count|d_count) == 0) {
+        if ( iret == 1 ) return rret;
+        return mul_rational(INT2FIX(iret),rret);
     }
 
     if ( b_count != 0 ) {

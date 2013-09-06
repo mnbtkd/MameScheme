@@ -4,7 +4,7 @@
             [assert (* 2 3) 6]
             [assert (* 2 3 4) 24]
             [assert (* 3 3/2) 9/2]
-            [assert (* 2 1/2) 2]
+            [assert (* 2 1/2) 1]
 
             [assert (/ 1) 1]
             [assert (/ 6 3) 2]
