@@ -574,7 +574,12 @@ SchObj subr_sub(int s, int n)
     sum = subr_add(s0,n0);
 
     if ( FIXNUMP(x) && FIXNUMP(sum) ) {
-        return INT2FIX( FIX2INT(x) - FIX2INT(sum) );
+        int dff = FIX2INT(x) - FIX2INT(sum);
+        if ( FIXABLE(dff) ) {
+            return INT2FIX(dff);
+        } else {
+            return int2bignum(dff);
+        }
     }
 
     if ( ( FIXNUMP(x) && BIGNUMP(sum) ) ||

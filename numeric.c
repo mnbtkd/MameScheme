@@ -313,7 +313,7 @@ SchObj diff_abs_bignum( SchBignum* x_b, SchBignum* y_b )
 
 SchObj add_int( SchObj x, SchObj y )
 {
-    SchBignum * x_b, * y_b;
+    SchBignum * x_b, * y_b, * ret;
 
     if ( FIXNUMP(x) ) {
         x_b = fix2bignum(x);
@@ -329,24 +329,22 @@ SchObj add_int( SchObj x, SchObj y )
 
     if ( x_b->sign == y_b->sign ) {
 
-        SchBignum* s = sum_abs_bignum(x_b,y_b);
-        s->sign = x_b->sign;
-        return s;
+        ret = sum_abs_bignum(x_b,y_b);
+        ret->sign = x_b->sign;
 
     } else {
 
-        SchBignum* d;
         int c = cmp_abs_bignum(x_b,y_b);
 
         if ( c == 0 ) {
             return INT2FIX(0);
         }
 
-        d = diff_abs_bignum(x_b,y_b);
-        d->sign = (c > 0) ? x_b->sign : y_b->sign ;
-        return d;
-
+        ret = diff_abs_bignum(x_b,y_b);
+        ret->sign = (c > 0) ? x_b->sign : y_b->sign ;
     }
+
+    return normalize_int(ret);
 
 }
 
@@ -380,7 +378,7 @@ int add_rational( SchRational* r1, SchRational* r2 )
 
 SchObj sub_int( SchObj x, SchObj y )
 {
-    SchBignum * x_b, * y_b;
+    SchBignum * x_b, * y_b, * ret;
 
     if ( FIXNUMP(x) ) {
         x_b = fix2bignum(x);
@@ -397,25 +395,20 @@ SchObj sub_int( SchObj x, SchObj y )
     if ( x_b->sign == y_b->sign ) {
 
         int c = cmp_abs_bignum(x_b,y_b);
-        SchBignum* d;
 
         if ( c == 0 ) {
             return INT2FIX(0);
         }
 
-        d = diff_abs_bignum(x_b,y_b);
-        d->sign = ( c > 0 ) ? x_b->sign : y_b->sign*-1 ;
-
-        return d;
+        ret = diff_abs_bignum(x_b,y_b);
+        ret->sign = ( c > 0 ) ? x_b->sign : y_b->sign*-1 ;
 
     } else {
-
-        SchBignum* s = sum_abs_bignum(x_b,y_b);
-        s->sign = x_b->sign;
-
-        return s;
-
+        ret = sum_abs_bignum(x_b,y_b);
+        ret->sign = x_b->sign;
     }
+
+    return normalize_int(ret);
 }
 
 
@@ -653,7 +646,7 @@ SchObj remainder_int( SchObj x, SchObj y )
     SchObj r;
     quotient_int_impl(x,y,&r);
 
-    return r;
+    return r;                   /* TODO: check */
 }
 
 int gcd_fixnum(int x, int y)

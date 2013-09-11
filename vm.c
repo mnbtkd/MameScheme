@@ -530,6 +530,7 @@ static char* to_s(SchObj obj)
     case T_MISC_DOT:      strcpy(str,"#<dot>"  ); break;
     case T_MISC_KOKKA:    strcpy(str,"#<kokka" ); break;
     case T_FIXNUM:        sprintf(str,"#<fixnum %ld>",FIX2INT(obj)); break;
+    case T_BIGNUM:        sprintf(str,"#<bignum %s>",bignum2str(obj,10)); break;
     case T_SYMBOL:        sprintf(str,"#<symbol %s>",SCH_ID2NAME(obj)); break;
     case T_STRING:        sprintf(str,"#<string %s>",SCH_STRING_OBJ(obj)->buf); break;
     case T_LAMBDA:        sprintf(str,"#<lambda >"); break;
