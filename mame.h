@@ -167,6 +167,7 @@ typedef struct SchBignumRec {
 SchObj str2bignum(char* str, int radix);
 char* bignum2str(SchBignum* obj, int base);
 SchObj add_int( SchObj x, SchObj y );
+SchObj sub_int( SchObj x, SchObj y );
 SchObj mul_int( SchObj x, SchObj y );
 #define SCH_BIGNUM_OBJ(obj)  ((SchBignum*)obj)
 

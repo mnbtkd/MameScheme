@@ -589,6 +589,12 @@ SchObj subr_sub(int s, int n)
         return sub_int( x, sum );
     }
 
+    if ( ( RATIONALP(x) && RATIONALP(sum) ) ||
+         ( RATIONALP(x) && ( FIXNUMP(sum) || BIGNUMP(sum) ) ) ||
+         ( FIXNUMP(x) || BIGNUMP(x) ) && RATIONALP(sum) ) {
+        return sub_rational( x, sum );
+    }
+
     if ( FIXNUMP(x) && FLOATP(sum) ) {
         return SCH_FLOAT( FIX2INT(x) - SCH_FLOAT_OBJ(sum)->d );
     }

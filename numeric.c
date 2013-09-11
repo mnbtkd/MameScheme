@@ -376,6 +376,34 @@ int add_rational( SchRational* r1, SchRational* r2 )
 }
 
 
+int sub_rational( SchRational* r1, SchRational* r2 )
+{
+    SchObj r1n,r1d,r2n,r2d,nmr,dnm;
+
+    if ( RATIONALP(r1) ) {
+        r1n = r1->numerator;
+        r1d = r1->denominator;
+    } else {
+        r1n = r1;
+        r1d = INT2FIX(1);
+    }
+    if ( RATIONALP(r2) ) {
+        r2n = r2->numerator;
+        r2d = r2->denominator;
+    } else {
+        r2n = r2;
+        r2d = INT2FIX(1);
+    }
+
+    nmr = sub_int( mul_int(r1n, r2d),
+                   mul_int(r1d, r2n) );
+
+    dnm = mul_int(r1d,r2d);
+
+    return SCH_RATIONAL(nmr,dnm);
+}
+
+
 SchObj sub_int( SchObj x, SchObj y )
 {
     SchBignum * x_b, * y_b, * ret;
