@@ -1,6 +1,7 @@
 (run-test "test_arithmetic.scm:arithmetic "
           (begin
             [assert (* 1) 1]
+            [assert (* 3) 3]
             [assert (* 2 3) 6]
             [assert (* 2 3 4) 24]
             [assert (* 3 3/2) 9/2]
@@ -13,9 +14,11 @@
             [assert (/ 67693145552775982373866185
                 2918354693076954957695495769285) 237519808957108710083741/10239841028340192834019283401]
             [assert (/ 4 2.0) 2]
-            [assert (/ 4 1/2) 2]
+            [assert (/ 4 1/2) 8]
             [assert (/ 9/7) 7/9]
+            [assert (/ 7)   1/7]
             [assert (/ 9/7 1/2) 18/7]
+            [assert (/ 9/5 1/2 5/4 6/7 123/17) 476/1025]
 
             [assert (quotient 7 3) 2]
             [assert (quotient -6 3) -2]

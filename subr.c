@@ -626,8 +626,8 @@ SchObj subr_div(int s, int n)
 
     LOOP_STACK(s,n,x){
         if ( RATIONALP(x) ) {
-            numer = mul_int(numer,SCH_RATIONAL_OBJ(x)->numerator);
-            x = SCH_RATIONAL_OBJ(x)->denominator;
+            numer = mul_int(numer,SCH_RATIONAL_OBJ(x)->denominator);
+            x = SCH_RATIONAL_OBJ(x)->numerator;
         }
 
         denom = mul_int(denom,x);
