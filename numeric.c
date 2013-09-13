@@ -166,21 +166,30 @@ int is_equal_num_rational_float( SchRational* r, SchFloat* f )
 }
 int is_equal_num( SchObj l, SchObj r)
 {
-    if ( (FIXNUMP(l) || BIGNUMP(l)) && (FIXNUMP(r) || BIGNUMP(r) ) ) {
+    if ( FIXNUMP(l) && FIXNUMP(r) ) {
+        return ( l == r );
+    } else if ( INTP(l) && INTP(r) ) {
         return is_equal_num_int(l,r);
     } else if ( FLOATP(l) && FLOATP(r) ) {
-        return (SCH_FLOAT_OBJ(l)->d == SCH_FLOAT_OBJ(r)->d);
+        return ( SCH_FLOAT_OBJ(l)->d == SCH_FLOAT_OBJ(r)->d );
     } else if ( RATIONALP(l) && RATIONALP(r) ) {
-        return ( (SCH_RATIONAL_OBJ(l)->numerator   == SCH_RATIONAL_OBJ(r)->numerator) &&
-                 (SCH_RATIONAL_OBJ(l)->denominator == SCH_RATIONAL_OBJ(r)->denominator) );
+
+        return ( subr_is_eqv_impl( SCH_RATIONAL_OBJ(l)->numerator,
+                                   SCH_RATIONAL_OBJ(r)->numerator ) &&
+                 subr_is_eqv_impl( SCH_RATIONAL_OBJ(l)->denominator,
+                                   SCH_RATIONAL_OBJ(r)->denominator ) );
+
     } else if ( RATIONALP(l) && FLOATP(r) ) {
-        return is_equal_num_rational_float(SCH_RATIONAL_OBJ(l),SCH_FLOAT_OBJ(r));
+        return is_equal_num_rational_float( SCH_RATIONAL_OBJ(l),
+                                            SCH_FLOAT_OBJ(r) );
     } else if ( FLOATP(l) && RATIONALP(r) ) {
-        return is_equal_num_rational_float(SCH_RATIONAL_OBJ(r),SCH_FLOAT_OBJ(l));
+        return is_equal_num_rational_float( SCH_RATIONAL_OBJ(r),
+                                            SCH_FLOAT_OBJ(l) );
     } else {
         return 0;
     }
 }
+
 
 /*
   abs(x) >  abs(y)  --->   1

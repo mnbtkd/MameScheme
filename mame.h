@@ -122,6 +122,8 @@ typedef int BOOL;
 #define BIGNUMP(obj)   (SCH_TYPE(obj) == T_BIGNUM)
 #define UNDEFINEP(obj) (SCH_TYPE(obj) == T_MISC_UNDEFINE)
 
+#define INTP(obj)      (FIXNUMP(obj)||BIGNUMP(obj))
+
 /* #define MISC_TYPE(obj) misc_type(obj) */
 
 static inline int misc_type(obj)

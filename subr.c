@@ -88,63 +88,6 @@ SchObj subr_is_eq( int s, int n )
     return (subr_is_eq_impl(x,y) ? SCH_TRUE : SCH_FALSE);
 }
 
-int subr_is_eqv_bignum_impl(SchObj x, SchObj y)
-{
-    if ( !BIGNUMP(x) || !BIGNUMP(y) ) {
-        return 0;
-    }
-
-    if ( SCH_BIGNUM_OBJ(x)->sign != SCH_BIGNUM_OBJ(y)->sign ) {
-        return 0;
-    }
-
-    SchBignum *longer, *shorter;
-    if (SCH_BIGNUM_OBJ(x)->len > SCH_BIGNUM_OBJ(y)->len) {
-        longer  = SCH_BIGNUM_OBJ(x);
-        shorter = SCH_BIGNUM_OBJ(y);
-    } else {
-        longer  = SCH_BIGNUM_OBJ(y);
-        shorter = SCH_BIGNUM_OBJ(x);
-    }
-
-    unsigned int n1,n2;
-    int i   = 0;
-    int len = shorter->len;
-
-    while ( len > i ) {
-
-        n1 = ((unsigned int*)(longer->digits))[i];
-        n2 = ((unsigned int*)(shorter->digits))[i];
-
-        if ( n1 != n2 ) {
-            return 0;
-        }
-
-        i++;
-    }
-    len = longer->len;
-    while ( len > i ) {
-        if (((unsigned int*)(longer->digits))[i] != 0 ) {
-            return 0;
-        }
-
-        i++;
-    }
-    return 1;
-}
-
-int subr_is_eqv_rational_impl(SchObj x, SchObj y)
-{
-    if ( !RATIONALP(x) || !RATIONALP(y) ) {
-        return 0;
-    }
-
-    return (subr_is_eqv_impl(SCH_RATIONAL_OBJ(x)->numerator,
-                             SCH_RATIONAL_OBJ(y)->numerator) &&
-            subr_is_eqv_impl(SCH_RATIONAL_OBJ(x)->denominator,
-                             SCH_RATIONAL_OBJ(y)->denominator));
-}
-
 int subr_is_eqv_impl( SchObj arg1, SchObj arg2 )
 {
     int type1, type2;
@@ -154,9 +97,12 @@ int subr_is_eqv_impl( SchObj arg1, SchObj arg2 )
     if ( type1 != type2 ) return 0;
 
     switch ( type1 ) {
-    case T_FIXNUM:       return (FIX2INT(arg1)==FIX2INT(arg2)); /* TODO check exact or not. */
-    case T_BIGNUM:       return subr_is_eqv_bignum_impl(arg1,arg2);
-    case T_RATIONAL:     return subr_is_eqv_rational_impl(arg1,arg2);
+    case T_FIXNUM:
+    case T_BIGNUM:
+    case T_RATIONAL:
+    case T_FLOAT:
+        /* TODO check exact or not. */
+        return is_equal_num(arg1,arg2);
     case T_SYMBOL:       return (strcmp(SCH_ID2NAME(arg1), SCH_ID2NAME(arg2))==0);
     case T_CHAR:         return (CHAR_EQUALP(arg1,arg2) == SCH_TRUE);
     case T_STRING:                /* FALLTHROU */
