@@ -240,9 +240,14 @@ SchObj subr_is_greater(int s, int n)
     SchObj l;
     l = POP_STACK(s); n--;
     LOOP_STACK(s,n,r) {
-        if ( FIX2INT(l) < FIX2INT(r) ) {
+        if ( FIXNUMP(l) && FIXNUMP(r) ) {
+            if ( !( FIX2INT(l) < FIX2INT(r) ) ) {
+                return SCH_FALSE;
+            }
         } else {
-            return SCH_FALSE;
+            if ( cmp_num(l,r) != -1 ) {
+                return SCH_FALSE;
+            }
         }
         l = r;
     }
@@ -255,9 +260,14 @@ SchObj subr_is_equal_to_or_greater(int s, int n)
     SchObj l;
     l = POP_STACK(s); n--;
     LOOP_STACK(s,n,r) {
-        if ( FIX2INT(l) <= FIX2INT(r)) {
+        if ( FIXNUMP(l) && FIXNUMP(r) ) {
+            if ( FIX2INT(l) > FIX2INT(r) ) {
+                return SCH_FALSE;
+            }
         } else {
-            return SCH_FALSE;
+            if ( cmp_num(l,r) > 0 ) {
+                return SCH_FALSE;
+            }
         }
         l = r;
     }
@@ -270,9 +280,14 @@ SchObj subr_is_less(int s, int n)
     SchObj l;
     l = POP_STACK(s); n--;
     LOOP_STACK(s,n,r){
-        if ( FIX2INT(l) > FIX2INT(r)) {
+        if ( FIXNUMP(l) && FIXNUMP(r) ) {
+            if ( !( FIX2INT(l) > FIX2INT(r) ) ) {
+                return SCH_FALSE;
+            }
         } else {
-            return SCH_FALSE;
+            if ( cmp_num(l,r) != 1 ) {
+                return SCH_FALSE;
+            }
         }
         l = r;
     }
@@ -285,9 +300,14 @@ SchObj subr_is_equal_to_or_less(int s, int n)
     SchObj l;
     l = POP_STACK(s); n--;
     LOOP_STACK(s,n,r){
-        if ( FIX2INT(l) >= FIX2INT(r) ) {
+        if ( FIXNUMP(l) && FIXNUMP(r) ) {
+            if ( FIX2INT(l) > FIX2INT(r) ) {
+                return SCH_FALSE;
+            }
         } else {
-            return SCH_FALSE;
+            if ( cmp_num(l,r) < 0 ) {
+                return SCH_FALSE;
+            }
         }
         l = r;
     }

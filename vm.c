@@ -531,6 +531,20 @@ static char* to_s(SchObj obj)
     case T_MISC_KOKKA:    strcpy(str,"#<kokka" ); break;
     case T_FIXNUM:        sprintf(str,"#<fixnum %ld>",FIX2INT(obj)); break;
     case T_BIGNUM:        sprintf(str,"#<bignum %s>",bignum2str(obj,10)); break;
+    case T_RATIONAL:      {
+        SchObj n = SCH_RATIONAL_OBJ(obj)->numerator;
+        SchObj d = SCH_RATIONAL_OBJ(obj)->denominator;
+        if ( FIXNUMP(n) && FIXNUMP(d) ) {
+            sprintf(str,"#<rational %d/%d>",FIX2INT(n),FIX2INT(d));
+        } else if ( FIXNUMP(n) ) {
+            sprintf(str,"#<rational %d/%s>",FIX2INT(n),bignum2str(d,10));
+        } else if ( FIXNUMP(d) ) {
+            sprintf(str,"#<rational %s/%d>",bignum2str(n,10),FIX2INT(d));
+        } else {
+            sprintf(str,"#<rational %s/%s>",bignum2str(n,10),bignum2str(d,10));
+        }
+        break;
+    }
     case T_SYMBOL:        sprintf(str,"#<symbol %s>",SCH_ID2NAME(obj)); break;
     case T_STRING:        sprintf(str,"#<string %s>",SCH_STRING_OBJ(obj)->buf); break;
     case T_LAMBDA:        sprintf(str,"#<lambda >"); break;

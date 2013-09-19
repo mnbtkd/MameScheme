@@ -29,6 +29,85 @@
             [assert (< 1 2 2 3)                                    #f]
             [assert (< -1 0)                                       #t]
             [assert (< -99 -1)                                     #t]
+            [assert (< 1.1 1.2)                                    #t]
+            [assert (< 1.2 1.1)                                    #f]
+            [assert (< 1.1 1.2 1.3)                                #t]
+            [assert (< 1.3 1.2 1.1)                                #f]
+            [assert (< 1/2 3/5)                                    #t]
+            [assert (< 2/7 1/5)                                    #f]
+            [assert (< 1/2 1/3 1/4 1/5)                            #f]
+            [assert (< 1/5 1/4 1/3 1/2)                            #t]
+            [assert (< 1 1.1)                                      #t] ; int float
+            [assert (< 1.1 1)                                      #f] ; int float
+            [assert (< 1 2684354551)                               #t] ; int       bignum
+            [assert (< 2684354551 1)                               #f] ; int       bignum
+            [assert (< 9 64/7)                                     #t] ; int              rational
+            [assert (< 9 62/7)                                     #f] ; int              rational
+            [assert (< 9 63/7)                                     #f] ; int              rational
+            [assert (< 1.1 2684354551)                             #t] ;     float bignum
+            [assert (< 2684354551 1.1)                             #f] ;     float bignum
+            [assert (< 1.2857 9/7)                                 #t] ;     float        rational
+            [assert (< 1.2858 9/7)                                 #f] ;     float        rational
+            [assert (< 2684354551 26843545510/9)                   #t] ;           bignum rational
+            [assert (< 26843545510/9 2684354551)                   #f] ;           bignum rational
+
+            [assert (< 1 1.1 2684354551)                           #t] ; int float bignum
+            [assert (< 1 2684354551 1.1)                           #f] ; int float bignum
+            [assert (< 1.1 2684354551 1)                           #f] ; int float bignum
+            [assert (< 1.1 1 2684354551)                           #f] ; int float bignum
+            [assert (< 2684354551 1.1 1)                           #f] ; int float bignum
+            [assert (< 2684354551 1 1.1)                           #f] ; int float bignum
+
+            [assert (< 1 1.1 5/3)                                  #t] ; int float        rational
+            [assert (< 1 5/3 1.1)                                  #f] ; int float        rational
+            [assert (< 1.1 5/3 1)                                  #f] ; int float        rational
+            [assert (< 1.1 1 5/3)                                  #f] ; int float        rational
+            [assert (< 5/3 1 1.1)                                  #f] ; int float        rational
+            [assert (< 5/3 1.1 1)                                  #f] ; int float        rational
+
+            [assert (< 1 2684354551 26843545510/9)                 #t] ; int       bignum rational
+            [assert (< 1 26843545510/9 2684354551)                 #f] ; int       bignum rational
+            [assert (< 26843545510/9 1 2684354551)                 #f] ; int       bignum rational
+            [assert (< 26843545510/9 2684354551 1)                 #f] ; int       bignum rational
+            [assert (< 2684354551 1 26843545510/9)                 #f] ; int       bignum rational
+            [assert (< 2684354551 26843545510/9 1)                 #f] ; int       bignum rational
+
+            [assert (< 1.1 2684354551 26843545510/9)               #t] ;     float bignum rational
+            [assert (< 1.1 26843545510/9 2684354551)               #f] ;     float bignum rational
+            [assert (< 26843545510/9 1.1 2684354551)               #f] ;     float bignum rational
+            [assert (< 26843545510/9 2684354551 1.1)               #f] ;     float bignum rational
+            [assert (< 2684354551 1.1 26843545510/9)               #f] ;     float bignum rational
+            [assert (< 2684354551 26843545510/9 1.1)               #f] ;     float bignum rational
+
+            [assert (< 1 1.1 2684354551 26843545510/9)             #t] ; int float bignum rational
+            [assert (< 1 1.1 26843545510/9 2684354551)             #f] ; int float bignum rational
+            [assert (< 1 26843545510/9 1.1 2684354551)             #f] ; int float bignum rational
+            [assert (< 1 26843545510/9 2684354551 1.1)             #f] ; int float bignum rational
+            [assert (< 1 2684354551 1.1 26843545510/9)             #f] ; int float bignum rational
+            [assert (< 1 2684354551 26843545510/9 1.1)             #f] ; int float bignum rational
+            [assert (< 1.1 1 2684354551 26843545510/9)             #f] ; int float bignum rational
+            [assert (< 1.1 1 26843545510/9 2684354551)             #f] ; int float bignum rational
+            [assert (< 1.1 2684354551 1 26843545510/9)             #f] ; int float bignum rational
+            [assert (< 1.1 2684354551 26843545510/9 1)             #f] ; int float bignum rational
+            [assert (< 1.1 26843545510/9 1 2684354551)             #f] ; int float bignum rational
+            [assert (< 1.1 26843545510/9 2684354551 1)             #f] ; int float bignum rational
+            [assert (< 2684354551 1 1.1 26843545510/9)             #f] ; int float bignum rational
+            [assert (< 2684354551 1 26843545510/9 1.1)             #f] ; int float bignum rational
+            [assert (< 2684354551 1.1 26843545510/9 1)             #f] ; int float bignum rational
+            [assert (< 2684354551 1.1 1 26843545510/9)             #f] ; int float bignum rational
+            [assert (< 2684354551 26843545510/9 1 1.1)             #f] ; int float bignum rational
+            [assert (< 2684354551 26843545510/9 1.1 1)             #f] ; int float bignum rational
+            [assert (< 26843545510/9 1 1.1 2684354551)             #f] ; int float bignum rational
+            [assert (< 26843545510/9 1 2684354551 1.1)             #f] ; int float bignum rational
+            [assert (< 26843545510/9 1.1 2684354551 1)             #f] ; int float bignum rational
+            [assert (< 26843545510/9 1.1 1 2684354551)             #f] ; int float bignum rational
+            [assert (< 26843545510/9 2684354551 1 1.1)             #f] ; int float bignum rational
+            [assert (< 26843545510/9 2684354551 1.1 1)             #f] ; int float bignum rational
+
+            [assert (< 2684354550 2684354551)                      #t]
+            [assert (< 2684354550 2684354551 2684354552)           #t]
+            [assert (< 2684354550 2684354551 2684354551)           #f]
+            [assert (< 2684354552 2684354551 2684354550)           #f]
 
             [assert (> 2 1)                                        #t]
             [assert (> 1 2)                                        #f]
@@ -38,6 +117,81 @@
             [assert (> 3 2 1 0)                                    #t]
             [assert (> 3 2 2 1)                                    #f]
             [assert (> -1 -2 -3 -4)                                #t]
+            [assert (> 1.4 1.1)                                    #t]
+            [assert (> 1.4 1.3 1.2 1.1)                            #t]
+            [assert (> 1.4 1.3 1.2 1.2 1.1)                        #f]
+            [assert (> 1.4 1.3 1.2 1.1 1.1)                        #f]
+            [assert (> 1/3 3/5)                                    #f]
+            [assert (> 2/5 1/7)                                    #t]
+            [assert (> 1/2 1/3 1/4 1/5)                            #t]
+            [assert (> 1/5 1/4 1/3 1/2)                            #f]
+
+            [assert (> 1 1.1)                                      #f] ; int float
+            [assert (> 1.1 1)                                      #t] ; int float
+            [assert (> 1 2684354551)                               #f] ; int       bignum
+            [assert (> 2684354551 1)                               #t] ; int       bignum
+            [assert (> 9 62/7)                                     #t] ; int              rational
+            [assert (> 9 63/7)                                     #f] ; int              rational
+            [assert (> 9 64/7)                                     #f] ; int              rational
+            [assert (> 1.1 2684354551)                             #f] ;     float bignum
+            [assert (> 2684354551 1.1)                             #t] ;     float bignum
+            [assert (> 1.2857 9/7)                                 #f] ;     float        rational
+            [assert (> 1.2858 9/7)                                 #t] ;     float        rational
+            [assert (> 2684354551 26843545510/9)                   #f] ;           bignum rational
+            [assert (> 26843545510/9 2684354551)                   #t] ;           bignum rational
+
+            [assert (> 1 1.1 2684354551)                           #f] ; int float bignum
+            [assert (> 1 2684354551 1.1)                           #f] ; int float bignum
+            [assert (> 1.1 2684354551 1)                           #f] ; int float bignum
+            [assert (> 1.1 1 2684354551)                           #f] ; int float bignum
+            [assert (> 2684354551 1.1 1)                           #t] ; int float bignum
+            [assert (> 2684354551 1 1.1)                           #f] ; int float bignum
+
+            [assert (> 1 1.1 5/3)                                  #f] ; int float        rational
+            [assert (> 1 5/3 1.1)                                  #f] ; int float        rational
+            [assert (> 1.1 5/3 1)                                  #f] ; int float        rational
+            [assert (> 1.1 1 5/3)                                  #f] ; int float        rational
+            [assert (> 5/3 1 1.1)                                  #f] ; int float        rational
+            [assert (> 5/3 1.1 1)                                  #t] ; int float        rational
+
+            [assert (> 1 2684354551 26843545510/9)                 #f] ; int       bignum rational
+            [assert (> 1 26843545510/9 2684354551)                 #f] ; int       bignum rational
+            [assert (> 26843545510/9 1 2684354551)                 #f] ; int       bignum rational
+            [assert (> 26843545510/9 2684354551 1)                 #t] ; int       bignum rational
+            [assert (> 2684354551 1 26843545510/9)                 #f] ; int       bignum rational
+            [assert (> 2684354551 26843545510/9 1)                 #f] ; int       bignum rational
+
+            [assert (> 1.1 2684354551 26843545510/9)               #f] ;     float bignum rational
+            [assert (> 1.1 26843545510/9 2684354551)               #f] ;     float bignum rational
+            [assert (> 26843545510/9 1.1 2684354551)               #f] ;     float bignum rational
+            [assert (> 26843545510/9 2684354551 1.1)               #t] ;     float bignum rational
+            [assert (> 2684354551 1.1 26843545510/9)               #f] ;     float bignum rational
+            [assert (> 2684354551 26843545510/9 1.1)               #f] ;     float bignum rational
+
+            [assert (> 1 1.1 2684354551 26843545510/9)             #f] ; int float bignum rational
+            [assert (> 1 1.1 26843545510/9 2684354551)             #f] ; int float bignum rational
+            [assert (> 1 26843545510/9 1.1 2684354551)             #f] ; int float bignum rational
+            [assert (> 1 26843545510/9 2684354551 1.1)             #f] ; int float bignum rational
+            [assert (> 1 2684354551 1.1 26843545510/9)             #f] ; int float bignum rational
+            [assert (> 1 2684354551 26843545510/9 1.1)             #f] ; int float bignum rational
+            [assert (> 1.1 1 2684354551 26843545510/9)             #f] ; int float bignum rational
+            [assert (> 1.1 1 26843545510/9 2684354551)             #f] ; int float bignum rational
+            [assert (> 1.1 2684354551 1 26843545510/9)             #f] ; int float bignum rational
+            [assert (> 1.1 2684354551 26843545510/9 1)             #f] ; int float bignum rational
+            [assert (> 1.1 26843545510/9 1 2684354551)             #f] ; int float bignum rational
+            [assert (> 1.1 26843545510/9 2684354551 1)             #f] ; int float bignum rational
+            [assert (> 2684354551 1 1.1 26843545510/9)             #f] ; int float bignum rational
+            [assert (> 2684354551 1 26843545510/9 1.1)             #f] ; int float bignum rational
+            [assert (> 2684354551 1.1 26843545510/9 1)             #f] ; int float bignum rational
+            [assert (> 2684354551 1.1 1 26843545510/9)             #f] ; int float bignum rational
+            [assert (> 2684354551 26843545510/9 1 1.1)             #f] ; int float bignum rational
+            [assert (> 2684354551 26843545510/9 1.1 1)             #f] ; int float bignum rational
+            [assert (> 26843545510/9 1 1.1 2684354551)             #f] ; int float bignum rational
+            [assert (> 26843545510/9 1 2684354551 1.1)             #f] ; int float bignum rational
+            [assert (> 26843545510/9 1.1 2684354551 1)             #f] ; int float bignum rational
+            [assert (> 26843545510/9 1.1 1 2684354551)             #f] ; int float bignum rational
+            [assert (> 26843545510/9 2684354551 1 1.1)             #f] ; int float bignum rational
+            [assert (> 26843545510/9 2684354551 1.1 1)             #t] ; int float bignum rational
 
             [assert (<= 3 4)                                       #t]
             [assert (<= 5 5)                                       #t]
@@ -47,6 +201,15 @@
             [assert (<= -1 -1)                                     #t]
             [assert (<= -1 0)                                      #t]
             [assert (<= 0 -1)                                      #f]
+            [assert (<= 1.1 1.2 1.3 1.4) #t]
+            [assert (<= 1.1 1.2 1.2 1.3) #t]
+            [assert (<= 1.1 1.0 1.0)     #f]
+            [assert (<= 1 1.0 1.1 2)     #t] ;int float
+            [assert (<= 1.0 1 1.1 2)     #t]
+            [assert (<= 1 1.1) #t]
+            [assert (<= 1.1 1) #f]
+            [assert (<= 2 1.1) #f]
+
 
             [assert (>= 4 3)                                       #t]
             [assert (>= 5 5)                                       #t]
@@ -57,11 +220,14 @@
             [assert (>= 3 2 2 1)                                   #t]
             [assert (>= 1 2 2 3)                                   #f]
             [assert (>= 0 -1 -1 -2)                                #t]
-
-
-
-
-
+            [assert (>= 1.4 1.3 1.2 1.1 1.1)                       #t]
+            [assert (>= 1.1 11/10)                                 #t]
+            [assert (>= 26843545510 2684354551 2684354550 2684354549) #t]
+            [assert (>= 26843545510 2684354551 2684354551 2684354550) #t]
+            [assert (>= 26843545510 2684354551 2684354551 2684354552) #f]
+            [assert (>= 26843545510/9 26843545510/8 26843545510/7) #f]
+            [assert (>= 26843545510/7 26843545510/8 26843545510/9) #t]
+            [assert (>= 26843545510/7 26843545510/8 26843545510/8 26843545510/9) #t]
             ))
 
 

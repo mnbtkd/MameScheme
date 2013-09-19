@@ -138,6 +138,34 @@ SchObj normalize_int( SchObj n )
     }
 }
 
+SchObj float2rational( SchObj f )
+{
+    char str[32];
+    size_t len,i;
+
+    sprintf(str,"%.16g",SCH_FLOAT_OBJ(f)->d);
+
+    len = strlen(str);
+    i   = strcspn(str,".");
+
+    char * ptr = str+i;
+    while ( *ptr ) {
+        *ptr = *(ptr+1);
+        ptr++;
+    }
+
+    *(ptr-1) = '/';
+    *(ptr++) = '1';
+
+    size_t j = len - i - 1;
+    while ( j-- ) {
+        *(ptr++) = '0';
+    }
+    *(ptr) = '\0';
+
+    return read_number(str,10);
+}
+
 int is_equal_num_int( SchObj l, SchObj r)
 {
     l = normalize_int(l);
@@ -190,6 +218,77 @@ int is_equal_num( SchObj l, SchObj r)
     }
 }
 
+/*
+  x >  y  --->   1
+  x == y  --->   0
+  x <  y  --->  -1
+ */
+int cmp_num( SchObj x, SchObj y )
+{
+    if ( FIXNUMP(x) && FIXNUMP(y) ) {
+        if      ( FIX2INT(x) >  FIX2INT(y) ) { return  1; }
+        else if ( FIX2INT(x) == FIX2INT(y) ) { return  0; }
+        else                                 { return -1; }
+    }
+    if ( FLOATP(x) && FLOATP(y) ) {
+        if      ( SCH_FLOAT_OBJ(x)->d >  SCH_FLOAT_OBJ(y)->d ) { return  1; }
+        else if ( SCH_FLOAT_OBJ(x)->d == SCH_FLOAT_OBJ(y)->d ) { return  0; }
+        else                                                   { return -1; }
+    }
+    if ( FLOATP(x) && FIXNUMP(y) ) {
+        if      ( SCH_FLOAT_OBJ(x)->d >  FIX2INT(y) ) { return  1; }
+        else if ( SCH_FLOAT_OBJ(x)->d == FIX2INT(y) ) { return  0; }
+        else                                          { return -1; }
+    }
+    if ( FIXNUMP(x) && FLOATP(y) ) {
+        if      ( FIX2INT(x) >  SCH_FLOAT_OBJ(y)->d ) { return  1; }
+        else if ( FIX2INT(x) == SCH_FLOAT_OBJ(y)->d ) { return  0; }
+        else                                          { return -1; }
+    }
+
+    if ( FIXNUMP(x) && BIGNUMP(y) ) { return -1; }
+    if ( BIGNUMP(x) && FIXNUMP(y) ) { return  1; }
+
+    if ( BIGNUMP(x) && BIGNUMP(y) ) {
+        int x_sign = SCH_BIGNUM_OBJ(x)->sign;
+        int y_sign = SCH_BIGNUM_OBJ(y)->sign;
+        if ( x_sign == y_sign ) {
+            int ret = cmp_abs_bignum(x,y);
+            if ( 0 < x_sign ) { return ret;      }
+            else              { return ret * -1; }
+        } else if ( x_sign > y_sign ) { return 1;
+        } else { return -1; }
+    }
+
+    if ( RATIONALP(x) && RATIONALP(y) ) {
+        SchObj newx = mul_int( SCH_RATIONAL_OBJ(x)->numerator,
+                               SCH_RATIONAL_OBJ(y)->denominator );
+        SchObj newy = mul_int( SCH_RATIONAL_OBJ(y)->numerator,
+                               SCH_RATIONAL_OBJ(x)->denominator );
+        return cmp_num( newx, newy );
+    }
+
+    if ( RATIONALP(x) && INTP(y) ) {
+        return cmp_num( SCH_RATIONAL_OBJ(x)->numerator,
+                        mul_int( SCH_RATIONAL_OBJ(x)->denominator, y ) );
+    }
+    if ( INTP(x) && RATIONALP(y) ) {
+        return cmp_num( mul_int( SCH_RATIONAL_OBJ(y)->denominator, x ),
+                        SCH_RATIONAL_OBJ(y)->numerator );
+    }
+
+    if ( RATIONALP(x) && FLOATP(y)    ) { return cmp_num(x,float2rational(y)); }
+    if ( FLOATP(x)    && RATIONALP(y) ) { return cmp_num(float2rational(x),y); }
+
+    if ( FLOATP(x) && BIGNUMP(y) ) {
+        return cmp_num( float2rational(x), y );
+    }
+    if ( BIGNUMP(x) && FLOATP(y) ) {
+        return cmp_num( x, float2rational(y) );
+    }
+
+    return 0;
+}
 
 /*
   abs(x) >  abs(y)  --->   1
