@@ -301,7 +301,7 @@ SchObj subr_is_equal_to_or_less(int s, int n)
     l = POP_STACK(s); n--;
     LOOP_STACK(s,n,r){
         if ( FIXNUMP(l) && FIXNUMP(r) ) {
-            if ( FIX2INT(l) > FIX2INT(r) ) {
+            if ( FIX2INT(l) < FIX2INT(r) ) {
                 return SCH_FALSE;
             }
         } else {
