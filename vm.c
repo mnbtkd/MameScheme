@@ -47,7 +47,7 @@ extern int flag_use_profiler;
 
 #define USE_DIRECT_THREADING 1
 
-#define USE_ITIMER_PROF 0
+#define USE_ITIMER_PROF 1
 #define SAMPLING_INTERVAL_MSEC 1
 #define SAMPLING_INTERVAL_USEC (SAMPLING_INTERVAL_MSEC*1000)
 
@@ -731,6 +731,7 @@ void dpr2( SchObj a, SchObj* x, int pc, int f, DisplayClosure* c, int s, int s_a
 static int       total_samples = 0;
 static st_table* smpl_tbl      = 0;
 static st_table* call_tbl      = 0;
+static char*     fname_tbl;
 
 typedef struct CallChainRec {
     char* fname;
@@ -775,15 +776,65 @@ char* top_fname()
     }
 }
 
+void fname_tbl_find(char* fname, char** ptr)
+{
+    char * p = fname_tbl;
+
+    while ( 1 ) {
+        if ( ( *p == ' ' ) || ( 0 == strcmp( p , fname ) ) ) {
+            *ptr = p;
+            return;
+        }
+        while ( 1 ) {
+            if ( *(++p) == '\0' ) {
+                if ( *(p+1) == '\0' ) {
+                    *ptr = *(++p);
+                    return;
+                }
+                p += sizeof(int) + 1;
+                break;
+            }
+        }
+    }
+}
+
+void fname_tbl_insert( char * fname, char * ptr )
+{
+    char * namep = fname;
+    char * p = ptr;
+
+    while ( *p && (*(p++) = *(namep++)) );
+
+    *((int*)p) = 1;
+}
+
+void to_sample_tbl()
+{
+    char * p = fname_tbl;
+    char * name;
+    while ( p && *p != ' ' ) {
+        name = p;
+        p += ( strlen(p) + 1 );
+        st_insert( smpl_tbl, name, *(int*)p );
+        p += sizeof(int);
+    }
+}
+
 void signal_handler(int signo)
 {
-    char* fname = top_fname();
+    char * fname = top_fname();
+    char * ptr   = fname_tbl;
+
     if ( fname ) {
-        int i=0;
-        if ( ! st_lookup(smpl_tbl, fname, &i) ) {
-            st_insert(smpl_tbl,fname,1);
+        fname_tbl_find( fname, &ptr );
+        if ( *ptr == ' ' ) {
+            fname_tbl_insert( fname, ptr );
+        } else if ( *ptr == '\0') {
+            fprintf(stderr,"function name table overflowed");
+            exit(1);
         } else {
-            st_insert(smpl_tbl,fname,++i);
+            ptr += strlen(fname) + 1;
+            *((int*)ptr) = *((int*)ptr) + 1;
         }
     }
     total_samples++;
@@ -791,8 +842,13 @@ void signal_handler(int signo)
 
 void start_profiler()
 {
-    /* profiler */
     struct sigaction act;
+    struct itimerval timer, old;
+
+    size_t tbl_sz = sizeof(char)*32*128;
+    char * p;
+
+    /* profiler */
     act.sa_handler = &signal_handler; /* set signal_handler */
     act.sa_flags   = SA_RESTART;      /* restart system call after signal handler  */
 #if USE_ITIMER_PROF
@@ -808,7 +864,14 @@ void start_profiler()
     smpl_tbl = st_init_strtable();
     total_samples = 0;
 
-    struct itimerval timer, old;
+    p = fname_tbl = SCH_MALLOC( tbl_sz );
+
+    while ( tbl_sz-- ) {
+        *(p++) = ' ';
+    }
+    *(p-2) = '\0';
+    *(p-1) = '\0';
+
 
     timer.it_interval.tv_sec  = 0;
     timer.it_interval.tv_usec = SAMPLING_INTERVAL_USEC;
@@ -848,28 +911,6 @@ void stop_profiler()
 
 }
 
-enum st_retval show_prof_a_line(char* key, int* rec)
-{
-    int i;
-    double per;
-    if ( key && st_lookup(smpl_tbl,key,&i) ) {
-        per = ((double)i) / total_samples * 100;
-    } else {
-        i   = 0;
-        per = 0;
-    }
-    printf("%-26s %10d %10d ( %5.2f %% )\n",key,rec,i,per);
-    return ST_CONTINUE;
-}
-
-void show_prof( char* title )
-{
-    printf("\n\n------------------------ [ %-16s ] -----------------------\n", title);
-    printf("total %d samples, %f seconds\n\n", total_samples, ((double)(total_samples*SAMPLING_INTERVAL_USEC ))/1000000);
-    printf("name                        num calls          total samples\n");
-    printf("--------------------------+----------+----------------------+\n");
-    st_foreach(call_tbl,show_prof_a_line);
-}
 
 enum st_retval count_size(char* key, int* rec, char* acc)
 {
@@ -908,6 +949,8 @@ void show_prof_sorted( char* title )
     base = SCH_MALLOC(sizeof(char*) * size);
     st_foreach(call_tbl,make_keys,base);
     make_keys(NULL,NULL,NULL);
+
+    to_sample_tbl();
 
     qsort(base,size,sizeof(char*),(int (*)(const void*,const void*))compare_sample_num);
 
@@ -1512,7 +1555,6 @@ SchObj vm_compile(SchObj code)
 
     if ( flag_use_profiler ){
         stop_profiler();
-/*         show_prof("compile time"); */
         show_prof_sorted("compile time");
     }
 
