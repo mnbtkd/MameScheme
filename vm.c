@@ -211,7 +211,7 @@ SchObj* save_stack ( int s )
 {
     SchObj* ret;
     int i;
-    ret = SCH_MALLOC( sizeof(int)*(s+1) );
+    ret = SCH_MALLOC( sizeof(SchObj)*(s+1) );
     ret[0] = s;
     for ( i=1 ; i<=s ; ++i ) {
         ret[i] = stack[i-1];
