@@ -156,7 +156,7 @@ typedef unsigned long SchObj;
 #define FIX2INT(obj)  (((long)obj)>>3)
 #define ZEROP(obj)    (FIX2INT(obj)==0)
 #define EXACT_FLAG    0x04
-#define FIXABLE(d)    ((d <= (LONG_MAX>>3)) && ((LONG_MIN>>3) <= d))
+#define FIXABLE(d)    ((d <= (INT_MAX>>3)) && ((INT_MIN>>3) <= d))
 
 /* BIGNUM */
 typedef struct SchBignumRec {
