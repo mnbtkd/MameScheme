@@ -89,7 +89,7 @@ char string_getbyte( SchPort* port )
     index   = port->src.string.index;
 
     if ( *current == '\0' && index >= 0 ) {
-        return SCH_EOF;
+        return EOF;
     }
 
     ret = *(++(port->src.string.current));
@@ -106,8 +106,8 @@ unsigned int string_getc( SchPort* port )
     current = port->src.string.current;
     index   = port->src.string.index;
 
-    if ( *current == '\0' && index >= 0 ) {
-        return SCH_EOF;
+    if ( index >= 0 && *current == '\0') {
+        return EOF;
     }
 
     ch = c = *(++(port->src.string.current));
@@ -121,7 +121,7 @@ unsigned int string_getc( SchPort* port )
         --size;
     }
 
-    return (( ch == 0U ) ? EOF : ch );
+    return ch;
 }
 void string_ungetc( char c, SchPort* port )
 {
