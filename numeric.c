@@ -134,7 +134,7 @@ SchObj normalize_int( SchObj n )
             }
         }
 
-        return bgn;
+        return (SchObj)bgn;
     }
 }
 
@@ -361,7 +361,7 @@ SchObj sum_abs_bignum( SchBignum* x_b, SchBignum* y_b )
         i++;
     }
 
-    return bgn;
+    return (SchObj)bgn;
 }
 
 
@@ -415,7 +415,7 @@ SchObj diff_abs_bignum( SchBignum* x_b, SchBignum* y_b )
         i++;
     }
 
-    return bgn;
+    return (SchObj)bgn;
 }
 
 
@@ -437,7 +437,7 @@ SchObj add_int( SchObj x, SchObj y )
 
     if ( x_b->sign == y_b->sign ) {
 
-        ret = sum_abs_bignum(x_b,y_b);
+        ret = (SchBignum*)sum_abs_bignum(x_b,y_b);
         ret->sign = x_b->sign;
 
     } else {
@@ -448,11 +448,11 @@ SchObj add_int( SchObj x, SchObj y )
             return INT2FIX(0);
         }
 
-        ret = diff_abs_bignum(x_b,y_b);
+        ret = (SchBignum*)diff_abs_bignum(x_b,y_b);
         ret->sign = (c > 0) ? x_b->sign : y_b->sign ;
     }
 
-    return normalize_int(ret);
+    return normalize_int((SchObj)ret);
 
 }
 
@@ -492,14 +492,14 @@ int sub_rational( SchRational* r1, SchRational* r2 )
         r1n = r1->numerator;
         r1d = r1->denominator;
     } else {
-        r1n = r1;
+        r1n = (SchObj)r1;
         r1d = INT2FIX(1);
     }
     if ( RATIONALP(r2) ) {
         r2n = r2->numerator;
         r2d = r2->denominator;
     } else {
-        r2n = r2;
+        r2n = (SchObj)r2;
         r2d = INT2FIX(1);
     }
 
@@ -536,15 +536,15 @@ SchObj sub_int( SchObj x, SchObj y )
             return INT2FIX(0);
         }
 
-        ret = diff_abs_bignum(x_b,y_b);
+        ret = (SchBignum*)diff_abs_bignum(x_b,y_b);
         ret->sign = ( c > 0 ) ? x_b->sign : y_b->sign*-1 ;
 
     } else {
-        ret = sum_abs_bignum(x_b,y_b);
+        ret = (SchBignum*)sum_abs_bignum(x_b,y_b);
         ret->sign = x_b->sign;
     }
 
-    return normalize_int(ret);
+    return normalize_int((SchObj)ret);
 }
 
 
@@ -596,7 +596,7 @@ SchObj mul_bignum( SchBignum* x_b, SchBignum* y_b )
         i++;
     }
 
-    return bgn;
+    return (SchObj)bgn;
 }
 
 SchObj mul_int( SchObj x, SchObj y )
@@ -660,7 +660,7 @@ SchObj quotient_int_impl( SchObj x, SchObj y, SchObj* rp )
     c = cmp_abs_bignum(x_b , y_b);
 
     if ( c < 0 ) {
-        *rp = normalize_int(x_b);
+        *rp = normalize_int((SchObj)x_b);
         return INT2FIX(0);
     } else if ( c == 0 ) {
         *rp = INT2FIX(0);
@@ -736,7 +736,7 @@ SchObj quotient_int_impl( SchObj x, SchObj y, SchObj* rp )
             ((BGDIGIT*)q->digits)[xi-yi]  = qd;
             ((BGDIGIT*)q0->digits)[xi-yi] = qd;
 
-            p  = mul_bignum(v_b,q0);
+            p  = (SchBignum*)mul_bignum(v_b,q0);
 
             if ( cmp_abs_bignum(u_b,p) < 0 ) {
                 qd--;
@@ -745,7 +745,7 @@ SchObj quotient_int_impl( SchObj x, SchObj y, SchObj* rp )
             }
         }
 
-        r   = sub_int( u_b, p );
+        r   = sub_int( (SchObj)u_b, (SchObj)p );
         r_b = FIXNUMP(r) ? fix2bignum(r) : SCH_BIGNUM_OBJ(r);
 
         if ( 0 > cmp_abs_bignum(r_b,v_b) ) {
@@ -761,8 +761,8 @@ SchObj quotient_int_impl( SchObj x, SchObj y, SchObj* rp )
                     rds[ri] = rd>>bsc;
                 }
             }
-            *rp = normalize_int(r_b);
-            return normalize_int(q);
+            *rp = normalize_int((SchObj)r_b);
+            return normalize_int((SchObj)q);
         } else {
             u_b = r_b;
         }
@@ -872,7 +872,7 @@ SchObj invert_sign(SchObj n) {
     if ( FIXNUMP(n) ) {
         return INT2FIX(FIX2INT(n)*-1);
     } else if ( BIGNUMP(n) ) {
-        n0 = bignum_copy(n);
+        n0 = (SchObj)bignum_copy(SCH_BIGNUM_OBJ(n));
         SCH_BIGNUM_OBJ(n0)->sign *= -1;
     } else if ( FLOATP(n) ) {
         n0 = SCH_FLOAT( SCH_FLOAT_OBJ(n)->d * -1 );

@@ -323,7 +323,7 @@ SchObj read_obj( SchPort* port ) {
         if ( c != '\0' ) {
             SCH_UNGETC(c,port);
         }
-        
+
         return read_number(TO_S_BUF(token_buffer_),10);
 
     } else if ( ch_class(c) == CL_LIST_END ) {

@@ -79,8 +79,8 @@ void write_rational(FILE* f, SchRational* r);
 /* #define WRITE_FLOAT(f,obj)    (gmp_fprintf(f,"%.Ff",SCH_FLOAT_OBJ(obj)->f)) */
 /* #define WRITE_FLOAT(f,obj)    (fprintf(f,"%-16g",SCH_FLOAT_OBJ(obj)->d)) */
 #define WRITE_FLOAT(f,obj)    (fprintf(f,"%.16g",SCH_FLOAT_OBJ(obj)->d))
-#define WRITE_RATIONAL(f,obj) (write_rational(f,obj))
-#define WRITE_BIGNUM(f,obj)   (fprintf(f,"%s",bignum2str(obj,10)))
+#define WRITE_RATIONAL(f,obj) (write_rational(f,SCH_RATIONAL_OBJ(obj)))
+#define WRITE_BIGNUM(f,obj)   (fprintf(f,"%s",bignum2str(SCH_BIGNUM_OBJ(obj),10)))
 #define WRITE_SYMBOL(f,obj)   (fprintf(f,SCH_ID2NAME(obj)))
 #define WRITE_CHAR(f,obj)     (write_char(f,obj))
 #define WRITE_STRING(f,obj)   (write_string(f,obj))

@@ -530,7 +530,7 @@ static char* to_s(SchObj obj)
     case T_MISC_DOT:      strcpy(str,"#<dot>"  ); break;
     case T_MISC_KOKKA:    strcpy(str,"#<kokka" ); break;
     case T_FIXNUM:        sprintf(str,"#<fixnum %ld>",FIX2INT(obj)); break;
-    case T_BIGNUM:        sprintf(str,"#<bignum %s>",bignum2str(obj,10)); break;
+    case T_BIGNUM:        sprintf(str,"#<bignum %s>",bignum2str(SCH_BIGNUM_OBJ(obj),10)); break;
     case T_RATIONAL:      {
         SchObj n = SCH_RATIONAL_OBJ(obj)->numerator;
         SchObj d = SCH_RATIONAL_OBJ(obj)->denominator;
@@ -1287,7 +1287,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int s
             instr = (int)*++x;
         } DT_BREAK;
         DT_CASE(I_NUATE) {
-            s = restore_stack(*++x);
+            s = restore_stack((SchObj*)*++x);
 #ifdef _VM_DEBUG
             s_att = restore_stack_att(*x);
 #endif

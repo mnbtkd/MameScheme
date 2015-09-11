@@ -112,21 +112,23 @@ typedef int BOOL;
 #define EOFP(obj)      (SCH_TYPE(obj) == T_MISC_EOF)
 #define UNBOUNDP(obj)  (SCH_TYPE(obj) == T_MISC_UNBOUND)
 #define SUBRP(obj)     (SCH_TYPE(obj) == T_SUBR)
-#define LAMBDAP(obj)   (SCH_TYPE(obj) == T_LAMBDA)
+#define LAMBDAP(obj)   (SCH_TYPE((SchObj)obj) == T_LAMBDA)
 #define VECTORP(obj)   (SCH_TYPE(obj) == T_VECTOR)
 #define BOOLEANP(obj)  (FALSEP(obj)||TRUEP(obj))
 #define PORTP(obj)     (SCH_TYPE(obj) == T_PORT)
 #define BOXP(obj)      (SCH_TYPE(obj) == T_BOX)
 #define FLOATP(obj)    (SCH_TYPE(obj) == T_FLOAT)
-#define RATIONALP(obj) (SCH_TYPE(obj) == T_RATIONAL)
+#define RATIONALP(obj) (SCH_TYPE((SchObj)obj) == T_RATIONAL)
 #define BIGNUMP(obj)   (SCH_TYPE(obj) == T_BIGNUM)
 #define UNDEFINEP(obj) (SCH_TYPE(obj) == T_MISC_UNDEFINE)
 
 #define INTP(obj)      (FIXNUMP(obj)||BIGNUMP(obj))
 
+typedef unsigned long SchObj;
+
 /* #define MISC_TYPE(obj) misc_type(obj) */
 
-static inline int misc_type(obj)
+static inline int misc_type(SchObj obj)
 {
     return ((obj >> 2) | 0xf0);
 }
@@ -137,7 +139,7 @@ typedef struct SchHeaderRec {
 
 #define SCH_HEADER(obj) ((SchHeader*)obj)
 
-static inline int sch_type(obj)
+static inline int sch_type(SchObj obj)
 {
     if ( FIXNUMP(obj) ) return T_FIXNUM;
     if ( SYMBOLP(obj) ) return T_SYMBOL;
@@ -147,7 +149,6 @@ static inline int sch_type(obj)
 }
 
 
-typedef unsigned long SchObj;
 
 
 
