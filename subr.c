@@ -1679,6 +1679,9 @@ int shift_up_args(int n,int m,int s)
     int i;
     for ( i = 1 ; i <= n ; ++i ) {
         stack[s - i + m] = stack[s - i];
+#ifdef _VM_DEBUG
+        stack_att[s - i + m] = stack_att[s - i];
+#endif
     }
     return s + m;
 }
@@ -1716,7 +1719,6 @@ SchObj subr_subr_apply( SchObj f, int s, int n )
 SchObj subr_lambda_apply(SchObj f, int s, int n)
 {
     DisplayClosure* cl;
-    int     size;
     SchObj* top;
 
     SchObj lst;
@@ -1725,7 +1727,6 @@ SchObj subr_lambda_apply(SchObj f, int s, int n)
     int    i;
 
     cl   = SCH_CLOSURE_OBJ(f);
-    size = cl->u.body.body_size;
     top  = cl->u.body.body_top;
 
     lst = INDEX_ST( s, n-1 );
@@ -1740,7 +1741,19 @@ SchObj subr_lambda_apply(SchObj f, int s, int n)
         lst = SCH_CDR( lst );
     }
 
-    SchObj ret = vm(0,top,cl,size,sp,sp);
+    sp = shift_up_args( n, 3, sp);
+
+    /* insert a dummy frame */
+    INDEX_SET(sp, n,   &HALT);
+    INDEX_SET(sp, n+1, 0);
+    INDEX_SET(sp, n+2, 0);
+#ifdef _VM_DEBUG
+    INDEX_SET_ATT(sp,n,  3);
+    INDEX_SET_ATT(sp,n+1,1);
+    INDEX_SET_ATT(sp,n+2,1);
+#endif
+
+    SchObj ret = vm(0,top,cl,sp,sp);
 
     return ret;
 }
@@ -1785,6 +1798,9 @@ SchObj subr_map( int s, int n)
         }
         arg = SCH_LIST1( SCH_CAR(args[i]) );
         sp = push_stk( arg, sp );
+#ifdef _VM_DEBUG
+        sp = push_att_obj( --sp );
+#endif
         args[i] = SCH_CDR( args[i] );
         
         for ( i = arg_num-2 ; i >= 0 ; --i ) {
@@ -1793,10 +1809,16 @@ SchObj subr_map( int s, int n)
             }
             arg = SCH_CAR( args[i] );
             sp  = push_stk( arg, sp );
+#ifdef _VM_DEBUG
+            sp = push_att_obj( --sp );
+#endif
             args[i] = SCH_CDR( args[i] );
         }
 
         sp = push_stk( fn, sp );
+#ifdef _VM_DEBUG
+        sp = push_att_obj( --sp );
+#endif
 
         SCH_QUEUE_PUSH( ret,
                         subr_apply( sp, n ) );
@@ -1814,7 +1836,7 @@ SchObj subr_foreach( int s, int n )
     int    i;
 /*     SchObj SCH_MANGLE(tmp); */
 
-    args = SCH_MALLOC( sizeof(SchObj) * (n-1) );
+    args = SCH_MALLOC( sizeof(SchObj) * arg_num );
 
     for ( i=0 ; i<arg_num ; ++i ) {
         args[i] = POP_STACK(sp);
@@ -1830,6 +1852,9 @@ SchObj subr_foreach( int s, int n )
         }
         arg = SCH_LIST1( SCH_CAR(args[i]) );
         sp = push_stk( arg, sp );
+#ifdef _VM_DEBUG
+        sp = push_att_obj( --sp );
+#endif
         args[i] = SCH_CDR( args[i] );
         
         for ( i = arg_num-2 ; i >= 0 ; --i ) {
@@ -1838,10 +1863,16 @@ SchObj subr_foreach( int s, int n )
             }
             arg = SCH_CAR( args[i] );
             sp  = push_stk( arg, sp );
+#ifdef _VM_DEBUG
+            sp = push_att_obj( --sp );
+#endif
             args[i] = SCH_CDR( args[i] );
         }
 
         sp = push_stk( fn, sp );
+#ifdef _VM_DEBUG
+        sp = push_att_obj( --sp );
+#endif
         subr_apply( sp, n );
     }
 

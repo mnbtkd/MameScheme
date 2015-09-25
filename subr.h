@@ -34,8 +34,15 @@
 
 
 extern SchObj stack[];
+extern SchObj HALT;
+
 #define INDEX_ST(__s__,__i__)           (stack[(__s__)-(__i__)-1])
 #define INDEX_SET(__s__,__i__,__obj__)  (stack[(__s__)-(__i__)-1]=(__obj__))
+
+#ifdef _VM_DEBUG
+extern int stack_att[];
+#define INDEX_SET_ATT(__s__,__i__,__att__)  (stack_att[(__s__)-(__i__)-1]=(__att__))
+#endif
 
 #define POP_STACK(_s)            (INDEX_ST(_s--,0))
 #define LOOP_STACK(_s,_n,_x)     for(;_n>0 && ((_x = INDEX_ST(_s, 0)),1);_s--,_n--)
@@ -241,8 +248,11 @@ extern SchObj subr_remainder(int s, int n);
 DisplayClosure* make_subr(SubrPnt fpnt,char* name);
 DisplayClosure* make_subrs( SubrPnt* pnt, char** name );
 
-SchObj vm ( int demand_insn_tbl, SchObj* x, DisplayClosure* c, int size, int sp, int fp );
+SchObj vm ( int demand_insn_tbl, SchObj* x, DisplayClosure* c, int sp, int fp );
 int push_stk ( SchObj x, int s );
 
+#ifdef _VM_DEBUG
+int push_att_obj( int s );
+#endif
 
 #endif  /* not INCLUDE_SUBR_H */

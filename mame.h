@@ -34,6 +34,8 @@
 
 #define DEBUG
 
+/* #define _VM_DEBUG */
+
 /* #include "config.h" */
 
 #include <string.h>

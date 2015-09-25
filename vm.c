@@ -35,7 +35,6 @@
 #include <errno.h>
 #include "subr.h"
 
-/* #define _VM_DEBUG */
 int do_dump = 0;
 
 extern int flag_use_profiler;
@@ -128,7 +127,7 @@ static SchObj SYM_RETURN;
 static SchObj SYM_JUMP;
 
 static SchObj NONE;
-static SchObj HALT;
+SchObj HALT;
 static SchObj LREF;
 static SchObj FREF;
 static SchObj GREF;
@@ -259,12 +258,18 @@ SchObj list_args2(int s, int x, int n)
 }
 
 #ifdef _VM_DEBUG
-static int stack_att[STACK_INIT_SIZE];
+int stack_att[STACK_INIT_SIZE];
 static int push_att( int type, int s )
 {
     stack_att[s] = type;
     return ++s;
 }
+int push_att_obj( int s )
+{
+    stack_att[s] = ATT_OBJECT;
+    return ++s;
+}
+
 static int index_st_att( int s, int i)
 {
     return stack_att[s-i-1];
@@ -693,9 +698,46 @@ char* dump_stack_s(int sp, int size)
     return buf;
 }
 
+char* dump_stack_att_s(int sp, int size)
+{
+    int i;
+    int bufsize = 2048;
+    char* buf = SCH_MALLOC(bufsize);
+    char tmp[512];
+    char* label[] = {
+        "ATT_CLOSURE",
+        "ATT_INTEGER",
+        "ATT_OBJECT",
+        "ATT_ADDRESS"
+    };
+
+    sprintf(buf,"\n--- dump_stack_att  sp[%d] size[%d] ---\n", sp, size);
+    for ( i = 0 ; i < size && sp-i > 0 ; ++i ) {
+#ifdef _VM_DEBUG
+        int type = index_st_att(sp-i,0);
+#else
+        int type = 0;           /* dummy */
+#endif
+        sprintf(tmp,"  %04d %s\n",sp-1-i,label[type]);
+        if ( bufsize <= (strlen(tmp) + strlen(buf)) ) {
+            bufsize += 2048;
+            buf = extend_strbuf(buf,bufsize);
+        }
+        buf = strcat(buf,tmp);
+    }
+    return buf;
+}
+
 void dump_stack(int sp, int size)
 {
     char* buf = dump_stack_s(sp,size);
+    printf(buf);
+    SCH_FREE(buf);
+}
+
+void dump_stack_att(int sp, int size)
+{
+    char* buf = dump_stack_att_s(sp,size);
     printf(buf);
     SCH_FREE(buf);
 }
@@ -722,6 +764,9 @@ void dpr2( SchObj a, SchObj* x, int pc, int f, DisplayClosure* c, int s, int s_a
     SCH_FREE(i_str);
     SCH_FREE(x_str);
     dump_stack(s,s);
+/* #ifdef _VM_DEBUG */
+/*     dump_stack_att(s,s); */
+/* #endif */
 }
 
 
@@ -980,14 +1025,13 @@ void show_prof_sorted( char* title )
 
 
 /* --- vm ---------------------------------------------------------------------------- */
-SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int sp, int fp )
+SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp )
 {
     int              pc = 0;            /* program counter            EIP? */
     volatile int     s  = sp;           /* stack top                  ESP? */
     volatile SchObj  a  = SCH_UNDEFINE; /* accumulator                EAP? */
     volatile int     f  = fp;           /* frame ( for dynamic link ) ESB? */
     int              instr;
-    SchObj *         last_addr = 0;
 
     volatile SchObj *         volatile x = x0;
     volatile DisplayClosure * volatile c = c0;
@@ -1027,14 +1071,10 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int s
 #endif
 
 
-    if ( 0 < size ) {
-        last_addr = &x[size-1];
-    }
-
 #ifdef _VM_DEBUG
-    printf("\n========================================\n");
-    printf("[ VM CALLED WITH LIMIT %p ]\n", last_addr);
-    printf("========================================\n");
+    if (do_dump) {
+        printf("\n[ vm.c:vm ]\n");
+    }
 #endif
 
     instr = (int)*x;
@@ -1235,15 +1275,6 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int s
                     push_fname(name);
                 }
                 a = (*(closure->u.subr))(s, *++x);
-
-                if ( x == last_addr ) {
-#ifdef _VM_DEBUG
-                    printf("\n--------------------------------\n");
-                    printf("reached to the last instruction. \n");
-                    printf("--------------------------------\n");
-#endif
-                    return a;
-                }
                 instr = *++x;
                 DT_BREAK;
             }
@@ -1262,15 +1293,6 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int s
 
             if ( flag_use_profiler ) {
                 pop_fname();
-            }
-
-            if ( x == last_addr ) { /* closureの中身を実行中の場合、最後のインストラクションを実行後に即リターンする */
-#ifdef _VM_DEBUG
-                printf("\n--------------------------------\n");
-                printf("reached to the last instruction. \n");
-                printf("--------------------------------\n");
-#endif
-                return a;
             }
 
             x  = ((SchObj*)        INDEX_ST(s,0));
@@ -1294,7 +1316,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int s
             instr = (int)*++x;
         } DT_BREAK;
         DT_CASE(I_JUMP) {
-            size = *(x+1);
+            int size = *(x+1);
             x+= 2+size;
             instr = (int)*x;
         } DT_BREAK;
@@ -1321,14 +1343,14 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int size, int s
 /*     char*   name[NUM_OF_SUBR]; */
 /*     DisplayClosure* c = make_subrs(pnt,name); */
 
-/* /\*     vm(0,kode,c,-1,0,0); *\/ */
+/* /\*     vm(0,kode,c,0,0); *\/ */
 /* /\*     exit(0); *\/ */
 
 /* #ifdef _VM_DEBUG */
 /*     printf("initial closure --- %d\n",c); */
 /* #endif */
 
-/*     ret = vm(0,pickup, c, -1, 0, 0); */
+/*     ret = vm(0,pickup, c, 0, 0); */
 /*     SCH_WRITE(ret); */
 /*     printf("\n"); */
 
@@ -1363,7 +1385,7 @@ void init_instructions()
     SYM_JUMP   = SCH_SYMBOL("jump");
 
 #if USE_DIRECT_THREADING
-    vm(1,NULL,NULL,0,0,0);
+    vm(1,NULL,NULL,0,0);
 #else
     NONE    = I_NONE;
     HALT    = I_HALT;
@@ -1516,7 +1538,7 @@ SchObj vm_eval(SchObj* code)
     char*   name[NUM_OF_SUBR];
     DisplayClosure* c = make_subrs(pnt,name);
     init_instructions();
-    return vm(0,code,c,-1,0,0);
+    return vm(0,code,c,0,0);
     SCH_FREE(c);                    /* TODO never reach here */
 }
 
@@ -1547,11 +1569,13 @@ SchObj vm_compile(SchObj code)
         start_profiler();
     }
 
-    icode = vm(0,codes,c,-1,0,0);
+    icode = vm(0,codes,c,0,0);
 
-/*     SCH_WRITE(icode); */
-/*     printf("\n"); */
-/*     do_dump = 1; */
+#ifdef _VM_DEBUG
+    SCH_WRITE(icode);
+    printf("\n");
+    do_dump = 1;
+#endif
 
     if ( flag_use_profiler ){
         stop_profiler();
@@ -1564,7 +1588,7 @@ SchObj vm_compile(SchObj code)
     if ( flag_use_profiler ) {
         start_profiler();
     }
-    ret = vm(0,SCH_VECTOR_OBJ(ivec)->vec,c,-1,0,0);
+    ret = vm(0,SCH_VECTOR_OBJ(ivec)->vec,c,0,0);
 /*     SCH_WRITE(ret); */
 
     if ( flag_use_profiler ){
