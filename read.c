@@ -69,6 +69,7 @@ void init_reader( void ) {
     ch_class_['\036'] = CL_WHITESPACE;
     ch_class_['\037'] = CL_WHITESPACE;
     ch_class_[' ']    = CL_WHITESPACE;
+    ch_class_['\0']   = CL_WHITESPACE;
 
     ch_class_['('] =  CL_LIST_BEGIN;
     ch_class_[')'] =  CL_LIST_END;
@@ -183,7 +184,7 @@ char* token( SchPort* port ) {
 
     CLEAR_BUF(token_buffer_);
 
-    while( (c = SCH_GETC(port)) != EOF ) {
+    while( (c = SCH_GETC(port)) != (unsigned char)EOF ) {
         cls = ch_class(c);
         if ( cls & CL_WHITESPACE ) {
             break;
@@ -320,9 +321,7 @@ SchObj read_obj( SchPort* port ) {
             c = SCH_GETC(port);
         }
 
-        if ( c != '\0' ) {
-            SCH_UNGETC(c,port);
-        }
+        SCH_UNGETC(c,port);
 
         return read_number(TO_S_BUF(token_buffer_),10);
 
