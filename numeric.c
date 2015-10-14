@@ -130,7 +130,7 @@ SchObj normalize_int( SchObj n )
 /*             int b = ((LONG_MIN>>3) <= (long)(digit*bgn->sign)) ? 2 : 3 ; */
 
             if ( ((digit & (INT_MAX+1U)) == 0) && FIXABLE((long)digit*bgn->sign) ) {
-                return INT2FIX(digit*bgn->sign);
+                return INT2FIX((int)digit*bgn->sign);
             }
         }
 
@@ -853,7 +853,8 @@ SchObj rational_fixnum(int n, int d)
     return (SchObj)ptr;
 }
 
-int is_negative(SchObj n) {
+int is_negative(SchObj n)
+{
     if ( FIXNUMP(n) ) {
         return ( FIX2INT(n) < 0 );
     } else if ( BIGNUMP(n) ) {
@@ -867,7 +868,8 @@ int is_negative(SchObj n) {
     }
 }
 
-SchObj invert_sign(SchObj n) {
+SchObj invert_sign(SchObj n)
+{
     SchObj n0 = SCH_NIL;
     if ( FIXNUMP(n) ) {
         return INT2FIX(FIX2INT(n)*-1);
