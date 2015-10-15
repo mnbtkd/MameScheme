@@ -34,8 +34,7 @@
 #include "mame.h"
 #include "subr.h"
 #include <ctype.h>
-
-
+#include "numeric.h"
 
 
 /*------------------------------------------------------------------------------------

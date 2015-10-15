@@ -37,7 +37,7 @@ port.o:    port.c mame.h
 read.o:    read.c mame.h
 util.o:    util.c mame.h
 numeric.o: numeric.c mame.h
-subr.o:    subr.c subr.h mame.h
+subr.o:    subr.c subr.h mame.h numeric.h
 
 GTAGS: list.c main.c mame.h st.c st.h vm.c write.c string.c vector.c symbol.c port.c read.c util.c numeric.c subr.c subr.h
 	$(GTAGS)

@@ -31,6 +31,7 @@
 
 
 #include <stdio.h>
+#include <math.h>
 #include "mame.h"
 
 enum CH_CLASS {

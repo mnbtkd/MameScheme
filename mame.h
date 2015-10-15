@@ -482,6 +482,7 @@ SchObj open_output_file(char* filename);
 void   close_port(SchPort* port);
 SchPort* make_input_port_stream(FILE* fp);
 SchObj read_obj_via_port(SchPort* port);
+SchObj read_number( char* s, int radix );
 void   sch_newline(SchPort* port);
 int    ch_attr(int c);
 SchObj sch_read (FILE* fp);

@@ -31,6 +31,7 @@
 
 #include "mame.h"
 #include <ctype.h>
+#include "numeric.h"
 
 /* TODO 論理右シフトなのか算術論理シフトなのかをはっきりする */
 #define DIGBITSIZE     (sizeof(int)*CHAR_BIT)
