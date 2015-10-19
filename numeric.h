@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
-  subr.h -  MameScheme ( Scheme Interpreter based on R5RS )
+  numeric.h -  MameScheme ( Scheme Interpreter based on R5RS )
   --------------------------------------------------------------------*/
 /*
  * Copyright (c) 2007-2011  mnbtkd
