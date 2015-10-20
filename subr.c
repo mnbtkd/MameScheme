@@ -322,7 +322,6 @@ SchObj subr_is_zero ( int s, int n )
 SchObj subr_add(int s, int n)
 {
     SchObj x;
-    SchObj ret = INT2FIX(0);
 
     int    iret = 0;
     double dret = 0;
@@ -682,7 +681,6 @@ SchObj subr_gcd(int s, int n)
 SchObj subr_lcm(int s, int n)
 {
     SchObj x,x0;
-    int    m;
 
     if ( n == 0 ) {
         return INT2FIX(1);
@@ -2065,12 +2063,13 @@ SchObj sch_load(SchString* filename)
 {
     SchPort * port = SCH_PORT_OBJ(open_input_file(filename->buf));
     SchObj    sexp;
-    SchObj    rslt;
+    /* SchObj    rslt; */
 
     while ( SCH_EOF != (sexp = read_obj_via_port(port)) ) {
 /*         SCH_WRITE(sexp); */
 /*         SCH_DISPLAY(SCH_CHAR('\n')); */
-        rslt = vm_compile(sexp);
+        /* rslt = */
+            vm_compile(sexp);
 /*         SCH_WRITE(rslt); */
 /*         SCH_DISPLAY(SCH_CHAR('\n')); */
     }
