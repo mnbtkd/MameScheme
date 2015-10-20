@@ -175,7 +175,7 @@ int is_equal_num_int( SchObj l, SchObj r)
     if ( FIXNUMP(l) && FIXNUMP(r) ) {
         return ( l == r );
     } else if ( BIGNUMP(l) && BIGNUMP(r) ) {
-        return ( cmp_abs_bignum(l,r) == 0 &&
+        return ( cmp_abs_bignum(SCH_BIGNUM_OBJ(l),SCH_BIGNUM_OBJ(r)) == 0 &&
                  (SCH_BIGNUM_OBJ(l)->sign == SCH_BIGNUM_OBJ(r)->sign) );
     } else {
         return 0;
@@ -254,7 +254,7 @@ int cmp_num( SchObj x, SchObj y )
         int x_sign = SCH_BIGNUM_OBJ(x)->sign;
         int y_sign = SCH_BIGNUM_OBJ(y)->sign;
         if ( x_sign == y_sign ) {
-            int ret = cmp_abs_bignum(x,y);
+            int ret = cmp_abs_bignum(SCH_BIGNUM_OBJ(x),SCH_BIGNUM_OBJ(y));
             if ( 0 < x_sign ) { return ret;      }
             else              { return ret * -1; }
         } else if ( x_sign > y_sign ) { return 1;
@@ -457,20 +457,20 @@ SchObj add_int( SchObj x, SchObj y )
 
 }
 
-int add_rational( SchRational* r1, SchRational* r2 )
+int add_rational( SchObj r1, SchObj r2 )
 {
     SchObj r1n,r1d,r2n,r2d,nmr,dnm;
 
     if ( RATIONALP(r1) ) {
-        r1n = r1->numerator;
-        r1d = r1->denominator;
+        r1n = SCH_RATIONAL_OBJ(r1)->numerator;
+        r1d = SCH_RATIONAL_OBJ(r1)->denominator;
     } else {
         r1n = r1;
         r1d = INT2FIX(1);
     }
     if ( RATIONALP(r2) ) {
-        r2n = r2->numerator;
-        r2d = r2->denominator;
+        r2n = SCH_RATIONAL_OBJ(r2)->numerator;
+        r2d = SCH_RATIONAL_OBJ(r2)->denominator;
     } else {
         r2n = r2;
         r2d = INT2FIX(1);
@@ -485,20 +485,20 @@ int add_rational( SchRational* r1, SchRational* r2 )
 }
 
 
-int sub_rational( SchRational* r1, SchRational* r2 )
+int sub_rational( SchObj r1, SchObj r2 )
 {
     SchObj r1n,r1d,r2n,r2d,nmr,dnm;
 
     if ( RATIONALP(r1) ) {
-        r1n = r1->numerator;
-        r1d = r1->denominator;
+        r1n = SCH_RATIONAL_OBJ(r1)->numerator;
+        r1d = SCH_RATIONAL_OBJ(r1)->denominator;
     } else {
         r1n = (SchObj)r1;
         r1d = INT2FIX(1);
     }
     if ( RATIONALP(r2) ) {
-        r2n = r2->numerator;
-        r2d = r2->denominator;
+        r2n = SCH_RATIONAL_OBJ(r2)->numerator;
+        r2d = SCH_RATIONAL_OBJ(r2)->denominator;
     } else {
         r2n = (SchObj)r2;
         r2d = INT2FIX(1);

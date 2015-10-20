@@ -337,7 +337,7 @@ SchObj subr_add(int s, int n)
         if ( FIXNUMP(x) ) {
             iret += FIX2INT(x);
             if ( ! FIXABLE(iret) ) {
-                bret = add_int( bret, int2bignum(iret) );
+                bret = add_int( bret, (SchObj)int2bignum(iret) );
                 b_count++;
                 iret = 0;
             }
@@ -543,7 +543,7 @@ SchObj subr_sub(int s, int n)
         if ( FIXABLE(dff) ) {
             return INT2FIX(dff);
         } else {
-            return int2bignum(dff);
+            return (SchObj)int2bignum(dff);
         }
     }
 

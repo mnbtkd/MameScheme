@@ -33,7 +33,7 @@
 #include "mame.h"
 
 
-int flag_use_profiler = 0;
+int flag_use_profiler;
 
 int main ( int argc, char** argv )
 {

@@ -101,11 +101,11 @@ void write_rational(FILE* f, SchRational* r)
     if ( FIXNUMP(n) && FIXNUMP(d) ) {
         fprintf(f,"%d/%d",FIX2INT(n),FIX2INT(d));
     } else if ( FIXNUMP(n) ) {
-        fprintf(f,"%d/%s",FIX2INT(n),bignum2str(d,10));
+        fprintf(f,"%d/%s",FIX2INT(n),bignum2str(SCH_BIGNUM_OBJ(d),10));
     } else if ( FIXNUMP(d) ) {
-        fprintf(f,"%s/%d",bignum2str(n,10),FIX2INT(d));
+        fprintf(f,"%s/%d",bignum2str(SCH_BIGNUM_OBJ(n),10),FIX2INT(d));
     } else {
-        fprintf(f,"%s/%s",bignum2str(n,10),bignum2str(d,10));
+        fprintf(f,"%s/%s",bignum2str(SCH_BIGNUM_OBJ(n),10),bignum2str(SCH_BIGNUM_OBJ(d),10));
     }
 }
 

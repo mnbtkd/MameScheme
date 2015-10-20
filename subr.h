@@ -37,7 +37,7 @@ extern SchObj stack[];
 extern SchObj HALT;
 
 #define INDEX_ST(__s__,__i__)           (stack[(__s__)-(__i__)-1])
-#define INDEX_SET(__s__,__i__,__obj__)  (stack[(__s__)-(__i__)-1]=(__obj__))
+#define INDEX_SET(__s__,__i__,__obj__)  (stack[(__s__)-(__i__)-1]=((SchObj)(__obj__)))
 
 #ifdef _VM_DEBUG
 extern int stack_att[];

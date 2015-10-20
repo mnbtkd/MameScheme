@@ -542,11 +542,11 @@ static char* to_s(SchObj obj)
         if ( FIXNUMP(n) && FIXNUMP(d) ) {
             sprintf(str,"#<rational %d/%d>",FIX2INT(n),FIX2INT(d));
         } else if ( FIXNUMP(n) ) {
-            sprintf(str,"#<rational %d/%s>",FIX2INT(n),bignum2str(d,10));
+            sprintf(str,"#<rational %d/%s>",FIX2INT(n),bignum2str(SCH_BIGNUM_OBJ(d),10));
         } else if ( FIXNUMP(d) ) {
-            sprintf(str,"#<rational %s/%d>",bignum2str(n,10),FIX2INT(d));
+            sprintf(str,"#<rational %s/%d>",bignum2str(SCH_BIGNUM_OBJ(n),10),FIX2INT(d));
         } else {
-            sprintf(str,"#<rational %s/%s>",bignum2str(n,10),bignum2str(d,10));
+            sprintf(str,"#<rational %s/%s>",bignum2str(SCH_BIGNUM_OBJ(n),10),bignum2str(SCH_BIGNUM_OBJ(d),10));
         }
         break;
     }
@@ -833,7 +833,7 @@ void fname_tbl_find(char* fname, char** ptr)
         while ( 1 ) {
             if ( *(++p) == '\0' ) {
                 if ( *(p+1) == '\0' ) {
-                    *ptr = *(++p);
+                    *ptr = ++p;
                     return;
                 }
                 p += sizeof(int) + 1;
