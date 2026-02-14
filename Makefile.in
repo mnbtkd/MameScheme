@@ -17,12 +17,17 @@ LIBS=@LIBS@
 # BGCLIB=-L/usr/local/lib -lgc
 
 GTAGS=gtags
+SKIP_GTAGS ?= 0
+GTAGS_DEP := GTAGS
+ifeq ($(SKIP_GTAGS),1)
+GTAGS_DEP :=
+endif
 
 OUT=mame
 .c.o:
 	$(CC) -I$(INCLUDE) $(CFLAGS) -c $<
 
-mame: main.o st.o list.o vm.o write.o string.o vector.o symbol.o port.o read.o util.o numeric.o subr.o GTAGS
+mame: main.o st.o list.o vm.o write.o string.o vector.o symbol.o port.o read.o util.o numeric.o subr.o $(GTAGS_DEP)
 	$(CC) $(CFLAGS) $(LIBS) -o $(OUT) main.o st.o list.o vm.o write.o string.o vector.o symbol.o port.o read.o util.o numeric.o subr.o
 
 main.o:    main.c mame.h
@@ -40,6 +45,10 @@ numeric.o: numeric.c mame.h
 subr.o:    subr.c subr.h mame.h numeric.h
 
 GTAGS: list.c main.c mame.h st.c st.h vm.c write.c string.c vector.c symbol.c port.c read.c util.c numeric.c subr.c subr.h
+	@command -v $(GTAGS) >/dev/null 2>&1 || { \
+		echo "gtags not found. Install GNU Global or run 'make SKIP_GTAGS=1'."; \
+		exit 1; \
+	}
 	$(GTAGS)
 
 clean:
