@@ -51,13 +51,16 @@ extern int flag_use_profiler;
 #define SAMPLING_INTERVAL_USEC (SAMPLING_INTERVAL_MSEC*1000)
 
 
+/* Dispatch to a threaded-code target.  Uses the compiler's computed-goto
+ * extension so it is architecture independent; the previous x86-only
+ * "jmp *%0" inline asm does not assemble on e.g. aarch64. */
 #define DISPATCH_DIRECTLY(addr) \
-  __asm__ __volatile__("jmp *%0" : : "r" (addr))
+  goto *(insn_type)(addr)
 
 #if USE_DIRECT_THREADING
   typedef void* insn_type;
   #define VM_LOOP_BEG
-  #define VM_DISPATCH_BLK   goto **x;
+  #define VM_DISPATCH_BLK   goto *(insn_type)*x;
   #define LBL_ADDR(__LBL__) &&LB_##__LBL__
   #define DT_CASE(__LBL__)  LB_##__LBL__:
   #define DT_DEFAULT        DT_CASE(DEFAULT)
@@ -366,7 +369,7 @@ static SchObj unbox(Box* box)
     return (box->obj);
 }
 /* --- display closure ------------------------------------------- */
-DisplayClosure* closure ( int type, SchObj* body_top, int free_var_size, int argnum, int body_size, int s )
+DisplayClosure* closure ( SchObj type, SchObj* body_top, int free_var_size, int argnum, int body_size, int s )
 {
     DisplayClosure* ret;
     int i;
@@ -449,7 +452,7 @@ static SchObj assign_global(int index, SchObj x)
 /*     } */
 /*     return ret; */
 /* } */
-static DisplayClosure* closure2( int type,
+static DisplayClosure* closure2( SchObj type,
                                  int body_size,
                                  SchObj* body_top,
                                  int var_size,
@@ -1031,7 +1034,9 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
     volatile int     s  = sp;           /* stack top                  ESP? */
     volatile SchObj  a  = SCH_UNDEFINE; /* accumulator                EAP? */
     volatile int     f  = fp;           /* frame ( for dynamic link ) ESB? */
-    int              instr;
+    SchObj           instr; /* current instruction; in direct-threading mode
+                             * this is a label address, so it must be
+                             * pointer-width rather than int. */
 
     volatile SchObj *         volatile x = x0;
     volatile DisplayClosure * volatile c = c0;
@@ -1077,7 +1082,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
     }
 #endif
 
-    instr = (int)*x;
+    instr = *x;
 
     VM_LOOP_BEG
 
@@ -1098,14 +1103,14 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
         }DT_BREAK;
         DT_CASE(I_CONST) {
             a = *(++x);
-            instr = (int)*(++x);
+            instr = *(++x);
         } DT_BREAK;
         DT_CASE(I_PUSH) {
             s = push_stk(a,s);
 #ifdef _VM_DEBUG
             s_att = push_att(ATT_OBJECT,s_att);
 #endif
-            instr = (int)*(++x);
+            instr = *(++x);
         } DT_BREAK;
         DT_CASE(I_FRAME) {
             int size = *(x+1);
@@ -1117,15 +1122,15 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
             s_att = push_att(ATT_ADDRESS,push_att(ATT_INTEGER, push_att(ATT_CLOSURE,s_att)));
 #endif
             x+=2;
-            instr = (int)*x;
+            instr = *x;
         } DT_BREAK;
         DT_CASE(I_FREF) {
             a = c->vars[*++x];
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_LREF) {
             a = INDEX_ST(f,*++x);
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_GREF) {
             a = index_global(*++x);
@@ -1144,7 +1149,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
                 }
             }
 
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_TEST) {
             x++;
@@ -1152,7 +1157,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
             if (a == SCH_FALSE) {
                 x += then_size;
             }
-            instr = (int)*x;
+            instr = *x;
         } DT_BREAK;
         DT_CASE(I_BOX) {
             SchObj obj = INDEX_ST(s,*++x);
@@ -1161,24 +1166,24 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
 #ifdef _VM_DEBUG
             index_set_att(s_att,*x,ATT_OBJECT);
 #endif
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_UNBOX) {
             a = unbox((Box*)a);
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_LSET) {
             Box* b = (Box*)INDEX_ST(f,*++x);
             set_box(b,a);
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_GSET) {
             a = assign_global(*++x,a);
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_FSET) {
             set_box((Box*)c->vars[*++x], a);
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
 #if USE_DIRECT_THREADING
         DT_CASE(I_CLOSE0) instr = (SchObj)LBL_ADDR(I_CLOSE0); goto CLOSE_DCL;
@@ -1201,7 +1206,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
 #ifdef _VM_DEBUG
             s_att -= free_var_size;
 #endif
-            instr = (int)*x;
+            instr = *x;
         } DT_BREAK;
         DT_CASE(I_CALL) {
             DisplayClosure* closure = (DisplayClosure*)a;
@@ -1265,7 +1270,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
                     printf("ERROR Invalid closure...\n");
                     exit(0);
                 }
-                instr = (int)*x;
+                instr = *x;
                 DT_BREAK;
 
             } else {
@@ -1286,7 +1291,7 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
 #ifdef _VM_DEBUG
             s_att = s;
 #endif
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_RETURN) {
             s -= *++x;
@@ -1302,27 +1307,27 @@ SchObj vm ( int demand_insn_tbl, SchObj* x0, DisplayClosure* c0, int sp, int fp 
 #ifdef _VM_DEBUG
             s_att = s;
 #endif
-            instr = (int)*x;
+            instr = *x;
         } DT_BREAK;
         DT_CASE(I_CONTI) {
             a = continuation(x, s); /* TODO to fix continuation */
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_NUATE) {
             s = restore_stack((SchObj*)*++x);
 #ifdef _VM_DEBUG
             s_att = restore_stack_att(*x);
 #endif
-            instr = (int)*++x;
+            instr = *++x;
         } DT_BREAK;
         DT_CASE(I_JUMP) {
             int size = *(x+1);
             x+= 2+size;
-            instr = (int)*x;
+            instr = *x;
         } DT_BREAK;
         DT_CASE(I_UNKNOWN)
         DT_DEFAULT {
-            printf("Internal Error: unknown instruction <%d>.\n",instr);
+            printf("Internal Error: unknown instruction <%ld>.\n",(long)instr);
             printf("\n\n");
             return 0;
         }
@@ -1415,7 +1420,10 @@ void init_instructions()
 
 }
 
-int ins_val(SchObj sym)
+/* Returns the executable representation of an instruction symbol.  In
+ * direct-threading mode this is a label address, so the result must be
+ * pointer-width (SchObj), not int, or it gets truncated on 64-bit. */
+SchObj ins_val(SchObj sym)
 {
 #if USE_DIRECT_THREADING
     if      ( SYM_NONE   == sym ) { return NONE; }
@@ -1476,7 +1484,7 @@ SchObj to_insn_vec(SchObj lst)
     SchObj vec = SCH_VECTOR(len);
     SchObj cdr = lst;
     int    i   = 0;
-    int    ins;
+    SchObj ins;
 
     while ( i < len ) {
 

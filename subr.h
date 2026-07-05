@@ -58,7 +58,8 @@ typedef struct ClosureBodyRec {
 
 typedef struct DisplayClosureRec {
     SchHeader hd;
-    int argtype;
+    SchObj argtype; /* CLOSE0/1/2; in direct-threading mode this holds a
+                     * label address, so it must be pointer-width, not int. */
     int argnum;
     char* name;
     union {

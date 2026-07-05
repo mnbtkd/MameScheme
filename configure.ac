@@ -9,6 +9,17 @@ AC_CONFIG_SRCDIR([mame.h])
 # Checks for programs.
 AC_PROG_CC
 
+# The generated compile.c contains deeply nested SCH_CONS(...) literals that
+# exceed clang's default bracket nesting limit (256). Raise it when the
+# compiler understands -fbracket-depth (clang); gcc rejects the flag and does
+# not need it, so it is silently skipped there.
+AC_MSG_CHECKING([whether $CC accepts -fbracket-depth])
+mame_save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fbracket-depth=1024"
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],
+                  [AC_MSG_RESULT([yes])],
+                  [AC_MSG_RESULT([no]); CFLAGS="$mame_save_CFLAGS"])
+
 # Checks for libraries.
 
 # Checks for header files.

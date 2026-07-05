@@ -33,7 +33,7 @@
 #include <ctype.h>
 #include "numeric.h"
 
-/* TODO ˜_—‰EƒVƒtƒg‚È‚Ì‚©ŽZp˜_—ƒVƒtƒg‚È‚Ì‚©‚ð‚Í‚Á‚«‚è‚·‚é */
+/* TODO ï¿½_ï¿½ï¿½ï¿½Eï¿½Vï¿½tï¿½gï¿½È‚Ì‚ï¿½ï¿½Zï¿½pï¿½_ï¿½ï¿½ï¿½Vï¿½tï¿½gï¿½È‚Ì‚ï¿½ï¿½ï¿½ï¿½Í‚ï¿½ï¿½ï¿½ï¿½è‚·ï¿½ï¿½ */
 #define DIGBITSIZE     (sizeof(int)*CHAR_BIT)
 #define BIGNUM_HO(num) ((num)>>DIGBITSIZE)
 #define BIGNUM_LO(num) ((num)&(UINT_MAX))
@@ -457,7 +457,7 @@ SchObj add_int( SchObj x, SchObj y )
 
 }
 
-int add_rational( SchObj r1, SchObj r2 )
+SchObj add_rational( SchObj r1, SchObj r2 )
 {
     SchObj r1n,r1d,r2n,r2d,nmr,dnm;
 
@@ -485,7 +485,7 @@ int add_rational( SchObj r1, SchObj r2 )
 }
 
 
-int sub_rational( SchObj r1, SchObj r2 )
+SchObj sub_rational( SchObj r1, SchObj r2 )
 {
     SchObj r1n,r1d,r2n,r2d,nmr,dnm;
 
