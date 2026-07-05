@@ -463,7 +463,12 @@ SchObj subr_mul(int s, int n)
         if (FIXNUMP(x)) {
             i0 = FIX2INT(x);
             /* overflow checking*/
-            if ( (idx_mostleft_bit_abs(iret)+1 + idx_mostleft_bit_abs(i0)+1) > (idx_mostleft_bit_abs(LONG_MAX>>3)+1) ) {
+            /* Fixnums have a 29-bit useful range (see FIXABLE / INT2FIX), so
+             * the overflow threshold must be INT_MAX>>3, matching FIXABLE.
+             * Using LONG_MAX>>3 here only happened to work on 32-bit where
+             * LONG_MAX==INT_MAX; on 64-bit it made every product overflow into
+             * the bignum path, dropping rational/float operands. */
+            if ( (idx_mostleft_bit_abs(iret)+1 + idx_mostleft_bit_abs(i0)+1) > (idx_mostleft_bit_abs(INT_MAX>>3)+1) ) {
                 /* overflowed */
                 /* printf("overflowed iret:%d  i0:%d    ireb.mlb:%d i0.mlb:%d  LONG_MAX.mlb%d\n", */
                 /*        iret, */
