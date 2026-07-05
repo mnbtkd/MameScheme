@@ -33,79 +33,101 @@
 (bootstrap "./lib_prc.scm")
 
 
+;; Map a built-in procedure name (symbol) to the C identifier of its
+;; implementation in the runtime.  Keyed on the Scheme *name* rather than
+;; on the procedure's printed representation, so it does not depend on how
+;; Gauche happens to print subrs/closures (that format has changed across
+;; versions, e.g. "#<subr cdr>" vs. "#<subr (cdr obj)>").
+(define *subr-name->cname*
+  '((+                   . "subr_add")
+    (-                   . "subr_sub")
+    (<=                  . "subr_is_equal_to_or_greater")
+    (<                   . "subr_is_greater")
+    (=                   . "subr_is_equal_to_or_less")
+    (append              . "subr_append")
+    (apply               . "subr_apply")
+    (assq                . "subr_assq")
+    (boolean?            . "subr_is_boolean")
+    (caar                . "subr_caar")
+    (cadr                . "subr_cadr")
+    (car                 . "subr_car")
+    (cdar                . "subr_cdar")
+    (cddr                . "subr_cddr")
+    (cdr                 . "subr_cdr")
+    (char=?              . "subr_char_is_equal")
+    (char?               . "subr_is_char")
+    (cons                . "subr_cons")
+    (eq?                 . "subr_is_eq")
+    (equal?              . "subr_is_equal")
+    (eqv?                . "subr_is_eqv")
+    (length              . "subr_length")
+    (list                . "subr_list")
+    (list?               . "subr_is_list")
+    (make-string         . "subr_make_string_k")
+    (make-vector         . "subr_make_vector")
+    (map                 . "subr_map")
+    (memq                . "subr_memq")
+    (memv                . "subr_memv")
+    (not                 . "subr_not")
+    (null?               . "subr_is_null")
+    (number->string      . "subr_number2string")
+    (number?             . "subr_is_number")
+    (pair?               . "subr_is_pair")
+    (procedure?          . "subr_is_procedure")
+    (set-cdr!            . "subr_set_cdr")
+    (string->symbol      . "subr_string2symbol")
+    (string-append       . "subr_string_append")
+    (string-length       . "subr_string_length")
+    (string-ref          . "subr_string_ref")
+    (string=?            . "subr_string_is_equal")
+    (string?             . "subr_is_string")
+    (substring           . "subr_substring")
+    (symbol->string      . "subr_symbol2string")
+    (symbol?             . "subr_is_symbol")
+    (vector-length       . "subr_vector_length")
+    (vector-ref          . "subr_vector_ref")
+    (vector-set!         . "subr_vector_set")
+    (list-ref            . "subr_list_ref")
+    (cdadr               . "subr_cdadr")
+    (caadr               . "subr_caadr")
+    (cadar               . "subr_cadar")
+    (cadddr              . "subr_cadddr")
+    (caddr               . "subr_caddr")
+    (cddddr              . "subr_cddddr")
+    (cdddr               . "subr_cdddr")
+    (open-input-file     . "subr_open_input_file")
+    (open-output-file    . "subr_open_output_file")
+    (close-input-port    . "subr_close_input_port")
+    (close-output-port   . "subr_close_output_port")
+    (current-input-port  . "subr_current_input_port")
+    (current-output-port . "subr_current_output_port")
+    ;; emitted as a NIL placeholder rather than a real subr pointer
+    (write               . "(void*)SCH_NIL")
+    (format              . "(void*)SCH_NIL")))
+
+;; Resolve an embedded built-in procedure object to its Scheme name by
+;; object identity, using the correspondence eval.scm already maintains
+;; between *builtin-fn* (the procedure objects) and *builtin-fn-name*
+;; (their names).  This is completely independent of the printed form.
+(define *subr-obj->name*
+  (let loop ([i 3] [acc '()])
+    (if (< i (vector-length *builtin-fn*))
+        (loop (+ i 1)
+              (cons (cons (vector-ref *builtin-fn* i)
+                          (list-ref *builtin-fn-name* (- i 3)))
+                    acc))
+        acc)))
+
+(define subr-name
+  (lambda(x)
+    (cond [(assq x *subr-obj->name*) => cdr]
+          [else #f])))
+
 (define immediate-subr
   (lambda(x)
-    (let ([exp x])
-      (cond
-       [(equal? exp "#<closure cdadr>")                 "subr_cdadr"]
-       [(equal? exp "#<closure caadr>")                 "subr_caadr"]
-       [(equal? exp "#<closure cadar>")                 "subr_cadar"]
-       [(equal? exp "#<closure cadddr>")                "subr_cadddr"]
-       [(equal? exp "#<closure caddr>")                 "subr_caddr"]
-       [(equal? exp "#<closure cddddr>")                "subr_cddddr"]
-       [(equal? exp "#<closure cdddr>")                 "subr_cdddr"]
-;       [(equal? exp "#<closure format>")                "subr_format"]
-       [(equal? exp "#<closure format>")                "(void*)SCH_NIL"]
-       [(equal? exp "#<subr +>")                        "subr_add"]
-       [(equal? exp "#<subr ->")                        "subr_sub"]
-       [(equal? exp "#<subr <=>")                       "subr_is_equal_to_or_greater"]
-       [(equal? exp "#<subr <>")                        "subr_is_greater"]
-       [(equal? exp "#<subr =>")                        "subr_is_equal_to_or_less"]
-       [(equal? exp "#<subr append>")                   "subr_append"]
-       [(equal? exp "#<subr apply>")                    "subr_apply"]
-       [(equal? exp "#<subr assq>")                     "subr_assq"]
-       [(equal? exp "#<subr boolean?>")                 "subr_is_boolean"]
-       [(equal? exp "#<subr caar>")                     "subr_caar"]
-       [(equal? exp "#<subr cadr>")                     "subr_cadr"]
-       [(equal? exp "#<subr car>")                      "subr_car"]
-       [(equal? exp "#<subr cdar>")                     "subr_cdar"]
-       [(equal? exp "#<subr cddr>")                     "subr_cddr"]
-       [(equal? exp "#<subr cdr>")                      "subr_cdr"]
-       [(equal? exp "#<subr char=?>")                   "subr_char_is_equal"]
-       [(equal? exp "#<subr char?>")                    "subr_is_char"]
-       [(equal? exp "#<subr cons>")                     "subr_cons"]
-       [(equal? exp "#<subr eq?>")                      "subr_is_eq"]
-       [(equal? exp "#<subr equal?>")                   "subr_is_equal"]
-       [(equal? exp "#<subr eqv?>")                     "subr_is_eqv"]
-       [(equal? exp "#<subr length>")                   "subr_length"]
-       [(equal? exp "#<subr list>")                     "subr_list"]
-       [(equal? exp "#<subr list?>")                    "subr_is_list"]
-       [(equal? exp "#<subr make-string>")              "subr_make_string_k"]
-       [(equal? exp "#<subr make-vector>")              "subr_make_vector"]
-       [(or (equal? exp "#<closure map>")
-            (equal? exp "#<subr map>"))                 "subr_map"]
-       [(equal? exp "#<subr memq>")                     "subr_memq"]
-       [(equal? exp "#<subr memv>")                     "subr_memv"]
-       [(equal? exp "#<subr not>")                      "subr_not"]
-       [(equal? exp "#<subr null?>")                    "subr_is_null"]
-       [(equal? exp "#<subr number->string>")           "subr_number2string"]
-       [(equal? exp "#<subr number?>")                  "subr_is_number"]
-       [(equal? exp "#<subr pair?>")                    "subr_is_pair"]
-       [(equal? exp "#<subr procedure?>")               "subr_is_procedure"]
-       [(equal? exp "#<subr set-cdr!>")                 "subr_set_cdr"]
-       [(equal? exp "#<subr string->symbol>")           "subr_string2symbol"]
-       [(equal? exp "#<subr string-append>")            "subr_string_append"]
-       [(equal? exp "#<subr string-length>")            "subr_string_length"]
-       [(equal? exp "#<subr string-ref>")               "subr_string_ref"]
-       [(equal? exp "#<subr string=?>")                 "subr_string_is_equal"]
-       [(equal? exp "#<subr string?>")                  "subr_is_string"]
-       [(equal? exp "#<subr substring>")                "subr_substring"]
-       [(equal? exp "#<subr symbol->string>")           "subr_symbol2string"]
-       [(equal? exp "#<subr symbol?>")                  "subr_is_symbol"]
-       [(equal? exp "#<subr vector-length>")            "subr_vector_length"]
-       [(equal? exp "#<subr vector-ref>")               "subr_vector_ref"]
-       [(equal? exp "#<subr vector-set!>")              "subr_vector_set"]
-       [(equal? exp "#<subr list-ref>")                 "subr_list_ref"]
-;;       [(equal? exp "#<subr write>")                    "subr_write"]
-       [(equal? exp "#<subr write>")                    "(void*)SCH_NIL"]
-       [(equal? exp "#<closure open-input-file>")       "subr_open_input_file"]
-       [(equal? exp "#<closure open-output-file>")      "subr_open_output_file"]
-       [(equal? exp "#<subr close-input-port>")         "subr_close_input_port"]
-       [(equal? exp "#<subr close-output-port>")        "subr_close_output_port"]
-       [(equal? exp "#<subr current-input-port>")       "subr_current_input_port"]
-       [(equal? exp "#<subr current-output-port>")      "subr_current_output_port"]
-       [else (string-append "UNKNOWN SUBR[" exp "]")]
-       ))))
+    (let ([name (subr-name x)])
+      (cond [(and name (assq name *subr-name->cname*)) => cdr]
+            [else (string-append "UNKNOWN SUBR[" (format #f "~A" x) "]")]))))
 (define immediate-exp
   (lambda(x)
     (cond [(number? x) (format #f "INT2FIX(~A)" x)]
@@ -150,7 +172,7 @@
                                         ;(symbol->string lst)
                                 (format #f "~v,,,')A" count ")"))))]
           [(procedure? x)
-           (immediate-subr (format #f "~A" x))]
+           (immediate-subr x)]
           [(vector? x)
            (format #f "SCH_VECTOR()/*:~S*/" x)]
           [else
@@ -203,13 +225,8 @@
                     l
                     (string-append str
                                    "\""
-                                   (if (procedure? (vector-ref vec i))
-                                       (let* ([subr_str (format #f "~A" (vector-ref vec i)) ]
-                                              [len (string-length subr_str)])
-                                         (if (char=? (string-ref subr_str 2) #\c)
-                                             (substring subr_str 10 (- len 1))
-                                             (substring subr_str 7  (- len 1))))
-                                       "????")
+                                   (let ([name (subr-name (vector-ref vec i))])
+                                     (if name (symbol->string name) "????"))
                                    "\""
                                     ", "))
               str))))
