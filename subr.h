@@ -70,8 +70,12 @@ typedef struct DisplayClosureRec {
     int vars_size;
 } DisplayClosure;
 
-SchPort* sch_stdout;
-SchPort* sch_stdin;
+/* Declarations only; the definitions live in port.c.  Without extern these
+ * are tentative definitions in every TU that includes this header, which the
+ * linker rejects as multiple definitions under -fno-common (GCC 10+ default,
+ * and on Windows). */
+extern SchPort* sch_stdout;
+extern SchPort* sch_stdin;
 
 #define SCH_CLOSURE_OBJ(_x)   ((DisplayClosure*)_x)
 
