@@ -519,11 +519,12 @@ SchObj subr_mul(int s, int n)
     if ( d_count == 0 ) {
         return ret;
     } else {
-        if ( b_count != 0 ) {
-            return SCH_NIL;     /* TODO implement */
-        } else {
-            return SCH_FLOAT( iret*dret );
-        }
+        /* A float operand is present, so the whole product is a float.
+         * bret/rret default to 1, so they fold in unconditionally and this
+         * covers fixnum, bignum and rational operands mixed with floats. */
+        return SCH_FLOAT( dret * (double)iret
+                          * number2double(bret)
+                          * number2double(rret) );
     }
 }
 

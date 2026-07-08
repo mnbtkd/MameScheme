@@ -32,6 +32,8 @@
 #ifndef INCLUDE_NUMERIC_H
 #define INCLUDE_NUMERIC_H
 
+double bignum2double( SchBignum* b );
+double number2double( SchObj n );
 SchObj normalize_int( SchObj n );
 SchObj remainder_int( SchObj x, SchObj y );
 int is_equal_num( SchObj l, SchObj r);

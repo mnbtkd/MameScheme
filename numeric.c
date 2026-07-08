@@ -50,6 +50,33 @@ SchObj make_float(double d)
     return (SchObj)ptr;
 }
 
+/* Convert a bignum to double.  Digits are base-2^32, little-endian. */
+double bignum2double( SchBignum* b )
+{
+    double d = 0.0;
+    int    i = b->len;
+    while ( i-- ) {
+        d = d * 4294967296.0 + (double)((BGDIGIT*)b->digits)[i];
+    }
+    return ( b->sign < 0 ) ? -d : d;
+}
+
+/* Convert any numeric object (fixnum/bignum/rational/float) to double. */
+double number2double( SchObj n )
+{
+    if ( FIXNUMP(n) ) {
+        return (double)FIX2INT(n);
+    } else if ( BIGNUMP(n) ) {
+        return bignum2double( SCH_BIGNUM_OBJ(n) );
+    } else if ( RATIONALP(n) ) {
+        return number2double( SCH_RATIONAL_OBJ(n)->numerator )
+             / number2double( SCH_RATIONAL_OBJ(n)->denominator );
+    } else if ( FLOATP(n) ) {
+        return SCH_FLOAT_OBJ(n)->d;
+    }
+    return 0.0;
+}
+
 SchBignum* newbignum( int len )
 {
     SchBignum * n;
